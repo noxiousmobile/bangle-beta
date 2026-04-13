@@ -102,9 +102,6 @@ export function RichTextEditor({
           }
         }
       }, 0)
-      
-      // Mark that we've received initial content
-      isInitializedRef.current = true
     }
     if (autoFocus && editorRef.current) {
       editorRef.current.focus()
