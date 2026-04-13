@@ -89,16 +89,25 @@ export function RichTextEditor({
       const markdown = htmlToMarkdown(html)
       setMarkdownContent(markdown)
       
-      // Fix duplicate character issue: remove last char if it matches first char
+      // Fix duplicate character issue: always remove last char when initialContent exists
+      // The keydown handler captures the keystroke which causes duplication
       setTimeout(() => {
         if (editorRef.current) {
           const text = editorRef.current.innerText || ""
-          if (text.length > 1 && text[0] === text[text.length - 1]) {
-            // Remove the last character by trimming it from the content
+          if (text.length > 1) {
+            // Remove the last character (the duplicate from keydown)
             const correctedText = text.slice(0, -1)
             const correctedHtml = convertPlainTextToHtml(correctedText)
             editorRef.current.innerHTML = correctedHtml
             setMarkdownContent(htmlToMarkdown(correctedHtml))
+            
+            // Move cursor to the end of the text
+            const selection = window.getSelection()
+            const range = document.createRange()
+            range.selectNodeContents(editorRef.current)
+            range.collapse(false) // false = collapse to end
+            selection?.removeAllRanges()
+            selection?.addRange(range)
           }
         }
       }, 0)
