@@ -15,6 +15,7 @@ interface TextEditorCardProps {
   toggleToCollapsedState?: () => void
   stickyButtons?: boolean
   isFullscreen?: boolean // New prop to indicate fullscreen mode
+  recentTags?: string[]
 }
 
 // Add the isFullscreen prop to the function parameters with default value
@@ -25,6 +26,7 @@ export function TextEditorCard({
   toggleToCollapsedState,
   stickyButtons = false,
   isFullscreen = false, // Default to false
+  recentTags = [],
 }: TextEditorCardProps) {
   const [text, setText] = useState<string>(initialText)
   const [htmlContent, setHtmlContent] = useState<string>("")
@@ -332,6 +334,7 @@ export function TextEditorCard({
                 placeholder="Write your note here..."
                 className="w-full h-full"
                 autoFocus={true}
+                recentTags={recentTags}
               />
             </div>
           </div>
