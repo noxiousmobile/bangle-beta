@@ -414,7 +414,12 @@ export function AddSection({
       onKeyDown={(e) => {
         // If user starts typing while in initial/options state, transition to text-editor
         if ((bottomState === "initial" || bottomState === "options") && !expanded) {
-          // Prevent typing from reaching the hidden input
+          // Capture the typed character (exclude special keys like Shift, Control, etc.)
+          if (e.key && e.key.length === 1) {
+            const newText = noteText + e.key
+            setNoteText(newText)
+          }
+          // Prevent the default key behavior to avoid duplication
           e.preventDefault()
           // Transition to text-editor mode
           setBottomState("text-editor")
