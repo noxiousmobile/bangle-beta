@@ -28,6 +28,7 @@ export function RichTextEditor({
   showTags = true,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
+  const isInitializedRef = useRef(false)
   const [isMarkdownMode, setIsMarkdownMode] = useState(false)
   const [markdownContent, setMarkdownContent] = useState("")
   const [autoTags, setAutoTags] = useState<string[]>([])
@@ -84,8 +85,11 @@ export function RichTextEditor({
   // Initialize content
   useEffect(() => {
     if (editorRef.current && initialContent) {
-      editorRef.current.innerHTML = convertPlainTextToHtml(initialContent)
-      setMarkdownContent(htmlToMarkdown(convertPlainTextToHtml(initialContent)))
+      const html = convertPlainTextToHtml(initialContent)
+      editorRef.current.innerHTML = html
+      setMarkdownContent(htmlToMarkdown(html))
+      // Mark that we've received initial content - skip first input event after this
+      isInitializedRef.current = true
     }
     if (autoFocus && editorRef.current) {
       editorRef.current.focus()
@@ -94,6 +98,14 @@ export function RichTextEditor({
 
   const handleInput = useCallback(() => {
     if (!editorRef.current) return
+    
+    // Skip the first input event if we just initialized with content
+    // This prevents duplication of the first character
+    if (isInitializedRef.current && initialContent) {
+      isInitializedRef.current = false
+      return
+    }
+    
     const html = editorRef.current.innerHTML
     const markdown = htmlToMarkdown(html)
     setMarkdownContent(markdown)
@@ -101,7 +113,7 @@ export function RichTextEditor({
       const allTags = [...new Set([...autoTags, ...customTags])]
       onChange(html, markdown, allTags)
     }
-  }, [onChange, autoTags, customTags])
+  }, [onChange, autoTags, customTags, initialContent])
 
   const handleSelectionChange = useCallback(() => {
     setActiveFormats({
