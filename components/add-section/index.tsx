@@ -425,13 +425,21 @@ export function AddSection({
         type="text"
         className="sr-only"
         aria-hidden="true"
+        value=""
+        onChange={(e) => {
+          const typedText = e.target.value
+          if (typedText) {
+            // User started typing, transition to text-editor with the typed text
+            setNoteText(typedText)
+            setBottomState("text-editor")
+          }
+        }}
         onPaste={async (e) => {
           const content = await handlePasteEvent(e)
           if (content) {
             handlePastedContent(content)
           }
         }}
-        onBlur={() => console.log("Input blurred")}
       />
 
       {expanded ? (
