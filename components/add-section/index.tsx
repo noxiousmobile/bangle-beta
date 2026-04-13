@@ -414,14 +414,8 @@ export function AddSection({
       onKeyDown={(e) => {
         // If user starts typing while in initial/options state, transition to text-editor
         if ((bottomState === "initial" || bottomState === "options") && !expanded) {
-          // Capture the typed character (exclude special keys like Shift, Control, etc.)
-          if (e.key && e.key.length === 1) {
-            const newText = noteText + e.key
-            setNoteText(newText)
-          }
-          // Prevent the default key behavior to avoid duplication
-          e.preventDefault()
-          // Transition to text-editor mode
+          // Don't prevent default or stop propagation - let it flow naturally
+          // Just transition to text-editor mode
           setBottomState("text-editor")
         }
       }}
@@ -433,12 +427,20 @@ export function AddSection({
         }
       }}
     >
-      {/* Hidden input to capture paste events */}
+      {/* Hidden input to capture typing */}
       <input
         ref={hiddenInputRef}
         type="text"
         className="sr-only"
         aria-hidden="true"
+        autoComplete="off"
+        onChange={(e) => {
+          // Transition to text-editor mode with the typed text
+          if (e.target.value) {
+            setNoteText(e.target.value)
+            setBottomState("text-editor")
+          }
+        }}
         onPaste={async (e) => {
           const content = await handlePasteEvent(e)
           if (content) {
