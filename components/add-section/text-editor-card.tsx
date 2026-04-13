@@ -254,9 +254,10 @@ export function TextEditorCard({
     }
   }, [text])
 
-  const handleEditorChange = (html: string, markdown: string) => {
+  const handleEditorChange = (html: string, markdown: string, tags: string[] = []) => {
     setHtmlContent(html)
     setText(markdown)
+    setTags(tags)
   }
 
   const handleSaveClick = () => {
