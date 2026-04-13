@@ -28,7 +28,6 @@ export function RichTextEditor({
   showTags = true,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
-  const isInitializedRef = useRef(false)
   const [isMarkdownMode, setIsMarkdownMode] = useState(false)
   const [markdownContent, setMarkdownContent] = useState("")
   const [autoTags, setAutoTags] = useState<string[]>([])
@@ -87,8 +86,24 @@ export function RichTextEditor({
     if (editorRef.current && initialContent) {
       const html = convertPlainTextToHtml(initialContent)
       editorRef.current.innerHTML = html
-      setMarkdownContent(htmlToMarkdown(html))
-      // Mark that we've received initial content - skip first input event after this
+      const markdown = htmlToMarkdown(html)
+      setMarkdownContent(markdown)
+      
+      // Fix duplicate character issue: remove last char if it matches first char
+      setTimeout(() => {
+        if (editorRef.current) {
+          const text = editorRef.current.innerText || ""
+          if (text.length > 1 && text[0] === text[text.length - 1]) {
+            // Remove the last character by trimming it from the content
+            const correctedText = text.slice(0, -1)
+            const correctedHtml = convertPlainTextToHtml(correctedText)
+            editorRef.current.innerHTML = correctedHtml
+            setMarkdownContent(htmlToMarkdown(correctedHtml))
+          }
+        }
+      }, 0)
+      
+      // Mark that we've received initial content
       isInitializedRef.current = true
     }
     if (autoFocus && editorRef.current) {
@@ -99,13 +114,6 @@ export function RichTextEditor({
   const handleInput = useCallback(() => {
     if (!editorRef.current) return
     
-    // Skip the first input event if we just initialized with content
-    // This prevents duplication of the first character
-    if (isInitializedRef.current && initialContent) {
-      isInitializedRef.current = false
-      return
-    }
-    
     const html = editorRef.current.innerHTML
     const markdown = htmlToMarkdown(html)
     setMarkdownContent(markdown)
@@ -113,7 +121,7 @@ export function RichTextEditor({
       const allTags = [...new Set([...autoTags, ...customTags])]
       onChange(html, markdown, allTags)
     }
-  }, [onChange, autoTags, customTags, initialContent])
+  }, [onChange, autoTags, customTags])
 
   const handleSelectionChange = useCallback(() => {
     setActiveFormats({
