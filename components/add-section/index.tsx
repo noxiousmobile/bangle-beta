@@ -411,6 +411,15 @@ export function AddSection({
           focusHiddenInput()
         }
       }}
+      onKeyDown={(e) => {
+        // If user starts typing while in initial/options state, transition to text-editor
+        if ((bottomState === "initial" || bottomState === "options") && !expanded) {
+          // Prevent typing from reaching the hidden input
+          e.preventDefault()
+          // Transition to text-editor mode
+          setBottomState("text-editor")
+        }
+      }}
       onContextMenu={(e) => {
         if (clipboardContent) {
           console.log("Right-click detected, clipboard has URL")
@@ -425,15 +434,6 @@ export function AddSection({
         type="text"
         className="sr-only"
         aria-hidden="true"
-        value=""
-        onChange={(e) => {
-          const typedText = e.target.value
-          if (typedText) {
-            // User started typing, transition to text-editor with the typed text
-            setNoteText(typedText)
-            setBottomState("text-editor")
-          }
-        }}
         onPaste={async (e) => {
           const content = await handlePasteEvent(e)
           if (content) {
