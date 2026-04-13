@@ -319,28 +319,26 @@ export function TextEditorCard({
   return (
     <motion.div
       key="text-editor-state"
-      className="flex-1 flex flex-col min-h-0"
+      className="flex flex-col h-full"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex-1 flex flex-col min-h-0">
-        <div className="w-full max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex flex-col flex-1 min-h-0">
-          <div className="py-4 flex-1 min-h-0 overflow-auto">
-            <div className="h-full px-6">
-              <RichTextEditor
-                initialContent={initialText}
-                onChange={handleEditorChange}
-                placeholder="Write your note here..."
-                className="w-full h-full"
-                autoFocus={true}
-                recentTags={recentTags}
-              />
-            </div>
+      <div className="flex flex-col h-full">
+        <div className="w-full max-w-5xl mx-auto bg-white rounded-lg shadow-lg flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto py-4 px-6">
+            <RichTextEditor
+              initialContent={initialText}
+              onChange={handleEditorChange}
+              placeholder="Write your note here..."
+              className="w-full"
+              autoFocus={true}
+              recentTags={recentTags}
+            />
           </div>
 
-          <div className="border-t border-gray-100 bg-white flex-shrink-0">
+          <div className="border-t border-gray-100 bg-white flex-shrink-0 sticky bottom-0">
             <div className="flex justify-end space-x-3 px-6 py-4">
               <motion.button
                 className="flex items-center space-x-1 px-4 py-2 bg-[#edf0f1] rounded-md text-gray-700"

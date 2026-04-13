@@ -294,8 +294,8 @@ export function RichTextEditor({
         />
       ) : (
         <div
-          className="editor-container border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-primary/20 overflow-auto"
-          style={{ minHeight: "10rem", maxHeight: "calc(100vh - 260px)" }}
+          className="editor-container border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-primary/20"
+          style={{ minHeight: "10rem" }}
         >
           <div
             ref={editorRef}
