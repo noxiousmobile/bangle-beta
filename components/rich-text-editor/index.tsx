@@ -131,6 +131,16 @@ export function RichTextEditor({
     }
   }, [onChange, autoTags, customTags])
 
+  // Trigger onChange when customTags changes (e.g., adding from recent tags)
+  useEffect(() => {
+    if (onChange && editorRef.current) {
+      const html = editorRef.current.innerHTML
+      const markdown = htmlToMarkdown(html)
+      const allTags = [...new Set([...autoTags, ...customTags])]
+      onChange(html, markdown, allTags)
+    }
+  }, [customTags, autoTags, onChange])
+
   const handleSelectionChange = useCallback(() => {
     setActiveFormats({
       bold: document.queryCommandState("bold"),
