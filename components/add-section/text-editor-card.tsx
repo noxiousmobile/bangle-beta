@@ -11,22 +11,19 @@ import { RichTextEditor } from "@/components/rich-text-editor"
 interface TextEditorCardProps {
   initialText: string
   handleDismiss: () => void
-  handleSave: (text: string, tags: string[], savedNote?: any) => void // Update this type
+  handleSave: (text: string, tags: string[], savedNote?: any) => void
   toggleToCollapsedState?: () => void
   stickyButtons?: boolean
-  isFullscreen?: boolean // New prop to indicate fullscreen mode
-  recentTags?: string[]
+  isFullscreen?: boolean
 }
 
-// Add the isFullscreen prop to the function parameters with default value
 export function TextEditorCard({
   initialText,
   handleDismiss,
   handleSave,
   toggleToCollapsedState,
   stickyButtons = false,
-  isFullscreen = false, // Default to false
-  recentTags = [],
+  isFullscreen = false,
 }: TextEditorCardProps) {
   const [text, setText] = useState<string>(initialText)
   const [htmlContent, setHtmlContent] = useState<string>("")
@@ -334,7 +331,6 @@ export function TextEditorCard({
               placeholder="Write your note here..."
               className="w-full"
               autoFocus={true}
-              recentTags={recentTags}
             />
           </div>
 
