@@ -313,20 +313,12 @@ export function RichTextEditor({
       {showTags && (
         <div className="mt-4 p-3 bg-muted/50 rounded-md border">
           <div className="flex flex-col space-y-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1 p-2 border border-border rounded-md bg-background min-h-[38px]">
               {autoTags.map((tag) => (
                 <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                   {tag}
                 </span>
               ))}
-              {autoTags.length === 0 && !isGeneratingTags && (
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Sparkles className="w-4 h-4" />
-                  Type to auto-generate tags
-                </span>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-1 p-2 border border-border rounded-md bg-background min-h-[38px]">
               {customTags.map((tag) => (
                 <span key={tag} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800 border border-green-200">
                   {tag}
