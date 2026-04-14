@@ -294,8 +294,8 @@ export function RichTextEditor({
         />
       ) : (
         <div
-          className="editor-container border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-primary/20"
-          style={{ minHeight: "10rem" }}
+          className="editor-container border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-primary/20 overflow-y-auto"
+          style={{ minHeight: "10rem", maxHeight: "calc(100vh - 400px)" }}
         >
           <div
             ref={editorRef}
@@ -304,7 +304,7 @@ export function RichTextEditor({
             onInput={handleInput}
             onKeyUp={handleSelectionChange}
             onMouseUp={handleSelectionChange}
-            className="prose prose-sm max-w-none p-3 outline-none min-h-[10rem]"
+            className="prose prose-sm max-w-none p-3 outline-none"
             data-placeholder={placeholder}
           />
         </div>
