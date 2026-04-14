@@ -72,6 +72,9 @@ export function DesktopLayout({
   >("recents");
   const [tagsToShow, setTagsToShow] = useState(20);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [recentTagsLimit, setRecentTagsLimit] = useState<number>(() => {
+    try { return parseInt(localStorage.getItem("recentTagsLimit") || "5", 10) || 5 } catch { return 5 }
+  });
   const [isTagsFilterVisible, setIsTagsFilterVisible] = useState(false);
   const [isMoodsFilterVisible, setIsMoodsFilterVisible] = useState(false);
   const [activeMood, setActiveMood] = useState<string | null>(null);
@@ -442,7 +445,7 @@ export function DesktopLayout({
                       className="fixed inset-0 z-40"
                       onClick={() => setIsSettingsOpen(false)}
                     />
-                    <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg z-50 py-1">
+                    <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg z-50 py-1 min-w-[220px]">
                       <button
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors whitespace-nowrap"
                         onClick={() => {
@@ -453,6 +456,31 @@ export function DesktopLayout({
                         <Download className="w-4 h-4 flex-shrink-0" />
                         Import (Google Keep)
                       </button>
+                      <div className="border-t border-border mx-1 my-1" />
+                      <div className="px-3 py-2">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm text-foreground">Recent tags to show</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[3, 5, 8, 10].map((n) => (
+                            <button
+                              key={n}
+                              className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                recentTagsLimit === n
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background text-muted-foreground border-border hover:border-primary hover:text-foreground"
+                              }`}
+                              onClick={() => {
+                                setRecentTagsLimit(n);
+                                try { localStorage.setItem("recentTagsLimit", String(n)) } catch {}
+                              }}
+                            >
+                              {n}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </>
                 )}

@@ -16,6 +16,7 @@ interface RichTextEditorProps {
   autoFocus?: boolean
   initialTags?: string[]
   showTags?: boolean
+  recentTags?: string[]
 }
 
 export function RichTextEditor({
@@ -26,6 +27,7 @@ export function RichTextEditor({
   autoFocus = true,
   initialTags = [],
   showTags = true,
+  recentTags = [],
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [isMarkdownMode, setIsMarkdownMode] = useState(false)
@@ -84,8 +86,33 @@ export function RichTextEditor({
   // Initialize content
   useEffect(() => {
     if (editorRef.current && initialContent) {
-      editorRef.current.innerHTML = convertPlainTextToHtml(initialContent)
-      setMarkdownContent(htmlToMarkdown(convertPlainTextToHtml(initialContent)))
+      const html = convertPlainTextToHtml(initialContent)
+      editorRef.current.innerHTML = html
+      const markdown = htmlToMarkdown(html)
+      setMarkdownContent(markdown)
+      
+      // Fix duplicate character issue: always remove last char when initialContent exists
+      // The keydown handler captures the keystroke which causes duplication
+      setTimeout(() => {
+        if (editorRef.current) {
+          const text = editorRef.current.innerText || ""
+          if (text.length > 1) {
+            // Remove the last character (the duplicate from keydown)
+            const correctedText = text.slice(0, -1)
+            const correctedHtml = convertPlainTextToHtml(correctedText)
+            editorRef.current.innerHTML = correctedHtml
+            setMarkdownContent(htmlToMarkdown(correctedHtml))
+            
+            // Move cursor to the end of the text
+            const selection = window.getSelection()
+            const range = document.createRange()
+            range.selectNodeContents(editorRef.current)
+            range.collapse(false) // false = collapse to end
+            selection?.removeAllRanges()
+            selection?.addRange(range)
+          }
+        }
+      }, 0)
     }
     if (autoFocus && editorRef.current) {
       editorRef.current.focus()
@@ -94,6 +121,7 @@ export function RichTextEditor({
 
   const handleInput = useCallback(() => {
     if (!editorRef.current) return
+    
     const html = editorRef.current.innerHTML
     const markdown = htmlToMarkdown(html)
     setMarkdownContent(markdown)
@@ -102,6 +130,16 @@ export function RichTextEditor({
       onChange(html, markdown, allTags)
     }
   }, [onChange, autoTags, customTags])
+
+  // Trigger onChange when customTags changes (e.g., adding from recent tags)
+  useEffect(() => {
+    if (onChange && editorRef.current) {
+      const html = editorRef.current.innerHTML
+      const markdown = htmlToMarkdown(html)
+      const allTags = [...new Set([...autoTags, ...customTags])]
+      onChange(html, markdown, allTags)
+    }
+  }, [customTags, autoTags, onChange])
 
   const handleSelectionChange = useCallback(() => {
     setActiveFormats({
@@ -256,8 +294,8 @@ export function RichTextEditor({
         />
       ) : (
         <div
-          className="editor-container border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-primary/20 overflow-auto"
-          style={{ minHeight: "10rem", maxHeight: "calc(100vh - 260px)" }}
+          className="editor-container border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-primary/20 overflow-y-auto"
+          style={{ minHeight: "10rem", maxHeight: "calc(100vh - 400px)" }}
         >
           <div
             ref={editorRef}
@@ -266,7 +304,7 @@ export function RichTextEditor({
             onInput={handleInput}
             onKeyUp={handleSelectionChange}
             onMouseUp={handleSelectionChange}
-            className="prose prose-sm max-w-none p-3 outline-none min-h-[10rem]"
+            className="prose prose-sm max-w-none p-3 outline-none"
             data-placeholder={placeholder}
           />
         </div>
@@ -277,20 +315,12 @@ export function RichTextEditor({
       {showTags && (
         <div className="mt-4 p-3 bg-muted/50 rounded-md border">
           <div className="flex flex-col space-y-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1 p-2 border border-border rounded-md bg-background min-h-[38px]">
               {autoTags.map((tag) => (
                 <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                   {tag}
                 </span>
               ))}
-              {autoTags.length === 0 && !isGeneratingTags && (
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Sparkles className="w-4 h-4" />
-                  Type to auto-generate tags
-                </span>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-1 p-2 border border-border rounded-md bg-background min-h-[38px]">
               {customTags.map((tag) => (
                 <span key={tag} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800 border border-green-200">
                   {tag}
@@ -304,10 +334,35 @@ export function RichTextEditor({
                 value={newTagInput}
                 onChange={(e) => setNewTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomTag())}
-                placeholder={customTags.length === 0 ? "Add tags" : "Add more"}
+                placeholder={autoTags.length === 0 && customTags.length === 0 ? "Type to auto-generate tags or add own..." : ""}
                 className="flex-1 min-w-[100px] outline-none bg-transparent text-sm py-1"
               />
             </div>
+
+            {recentTags.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-muted-foreground">Recently used</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {recentTags
+                    .filter((tag) => !customTags.includes(tag) && !autoTags.includes(tag))
+                    .map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (!customTags.includes(tag)) {
+                            setCustomTags([...customTags, tag])
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+                      >
+                        <span>+</span>
+                        {tag}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

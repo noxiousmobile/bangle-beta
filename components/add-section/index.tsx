@@ -74,6 +74,27 @@ export function AddSection({
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [isProcessingImage, setIsProcessingImage] = useState(false)
 
+  // Compute recently used tags ranked by frequency across all notes
+  const recentTags = (() => {
+    const limit = (() => {
+      try {
+        return parseInt(localStorage.getItem("recentTagsLimit") || "5", 10) || 5
+      } catch {
+        return 5
+      }
+    })()
+    const freq: Record<string, number> = {}
+    for (const note of notes) {
+      for (const tag of note.tags ?? []) {
+        freq[tag] = (freq[tag] ?? 0) + 1
+      }
+    }
+    return Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([tag]) => tag)
+  })()
+
   const bottomRef = useRef<HTMLDivElement>(null)
   const hiddenInputRef = useRef<HTMLInputElement>(null)
   const { clipboardContent, handlePaste, handlePasteEvent } = useClipboard()
@@ -411,6 +432,14 @@ export function AddSection({
           focusHiddenInput()
         }
       }}
+      onKeyDown={(e) => {
+        // If user starts typing while in initial/options state, transition to text-editor
+        if ((bottomState === "initial" || bottomState === "options") && !expanded) {
+          // Don't prevent default or stop propagation - let it flow naturally
+          // Just transition to text-editor mode
+          setBottomState("text-editor")
+        }
+      }}
       onContextMenu={(e) => {
         if (clipboardContent) {
           console.log("Right-click detected, clipboard has URL")
@@ -419,19 +448,26 @@ export function AddSection({
         }
       }}
     >
-      {/* Hidden input to capture paste events */}
+      {/* Hidden input to capture typing */}
       <input
         ref={hiddenInputRef}
         type="text"
         className="sr-only"
         aria-hidden="true"
+        autoComplete="off"
+        onChange={(e) => {
+          // Transition to text-editor mode with the typed text
+          if (e.target.value) {
+            setNoteText(e.target.value)
+            setBottomState("text-editor")
+          }
+        }}
         onPaste={async (e) => {
           const content = await handlePasteEvent(e)
           if (content) {
             handlePastedContent(content)
           }
         }}
-        onBlur={() => console.log("Input blurred")}
       />
 
       {expanded ? (
@@ -489,6 +525,7 @@ export function AddSection({
                 toggleToCollapsedState={toggleToCollapsedState}
                 stickyButtons={true}
                 isFullscreen={isFullscreen}
+                recentTags={recentTags}
               />
             </div>
           )}
