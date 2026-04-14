@@ -74,6 +74,27 @@ export function AddSection({
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [isProcessingImage, setIsProcessingImage] = useState(false)
 
+  // Compute recently used tags ranked by frequency across all notes
+  const recentTags = (() => {
+    const limit = (() => {
+      try {
+        return parseInt(localStorage.getItem("recentTagsLimit") || "5", 10) || 5
+      } catch {
+        return 5
+      }
+    })()
+    const freq: Record<string, number> = {}
+    for (const note of notes) {
+      for (const tag of note.tags ?? []) {
+        freq[tag] = (freq[tag] ?? 0) + 1
+      }
+    }
+    return Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([tag]) => tag)
+  })()
+
   const bottomRef = useRef<HTMLDivElement>(null)
   const hiddenInputRef = useRef<HTMLInputElement>(null)
   const { clipboardContent, handlePaste, handlePasteEvent } = useClipboard()
@@ -504,6 +525,7 @@ export function AddSection({
                 toggleToCollapsedState={toggleToCollapsedState}
                 stickyButtons={true}
                 isFullscreen={isFullscreen}
+                recentTags={recentTags}
               />
             </div>
           )}

@@ -16,6 +16,7 @@ interface RichTextEditorProps {
   autoFocus?: boolean
   initialTags?: string[]
   showTags?: boolean
+  recentTags?: string[]
 }
 
 export function RichTextEditor({
@@ -26,6 +27,7 @@ export function RichTextEditor({
   autoFocus = true,
   initialTags = [],
   showTags = true,
+  recentTags = [],
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [isMarkdownMode, setIsMarkdownMode] = useState(false)
@@ -332,10 +334,35 @@ export function RichTextEditor({
                 value={newTagInput}
                 onChange={(e) => setNewTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomTag())}
-                placeholder="Type to auto-generate tags or add own..."
+                placeholder={autoTags.length === 0 && customTags.length === 0 ? "Type to auto-generate tags or add own..." : ""}
                 className="flex-1 min-w-[100px] outline-none bg-transparent text-sm py-1"
               />
             </div>
+
+            {recentTags.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-muted-foreground">Recently used</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {recentTags
+                    .filter((tag) => !customTags.includes(tag) && !autoTags.includes(tag))
+                    .map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (!customTags.includes(tag)) {
+                            setCustomTags([...customTags, tag])
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
+                      >
+                        <span>+</span>
+                        {tag}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

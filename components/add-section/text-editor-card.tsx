@@ -15,6 +15,7 @@ interface TextEditorCardProps {
   toggleToCollapsedState?: () => void
   stickyButtons?: boolean
   isFullscreen?: boolean
+  recentTags?: string[]
 }
 
 export function TextEditorCard({
@@ -24,6 +25,7 @@ export function TextEditorCard({
   toggleToCollapsedState,
   stickyButtons = false,
   isFullscreen = false,
+  recentTags = [],
 }: TextEditorCardProps) {
   const [text, setText] = useState<string>(initialText)
   const [htmlContent, setHtmlContent] = useState<string>("")
@@ -331,6 +333,7 @@ export function TextEditorCard({
               placeholder="Write your note here..."
               className="w-full"
               autoFocus={true}
+              recentTags={recentTags}
             />
           </div>
 
