@@ -32,7 +32,9 @@ import { aiOrganizationEngine } from "@/lib/ai/organization-engine";
 import { InlineNoteView } from "@/components/note-preview/inline-note-view";
 import type { Note } from "@/lib/data";
 import type { PanInfo } from "framer-motion";
-import type { ViewMode } from "@/lib/types";
+import type { ViewMode, Bangle } from "@/lib/types";
+import { BangleViewer, BangleList, CreateBangleModal } from "@/components/bangle";
+import { Layers } from "lucide-react";
 
 interface DesktopLayoutProps {
   notes: Note[];
@@ -46,6 +48,14 @@ interface DesktopLayoutProps {
   onNoteSaved: (note: Note) => void;
   onShare: () => void;
   onShareNote?: (note: Note) => void;
+  // Bangle props
+  bangles?: Bangle[];
+  selectedBangle?: Bangle | null;
+  onCreateBangle?: (bangle: Bangle) => void;
+  onDeleteBangle?: (bangleId: string) => void;
+  onUpdateBangle?: (bangle: Bangle) => void;
+  onSelectBangle?: (bangle: Bangle) => void;
+  onCloseBangle?: () => void;
 }
 
 export function DesktopLayout({
@@ -60,6 +70,13 @@ export function DesktopLayout({
   onNoteSaved,
   onShare,
   onShareNote,
+  bangles = [],
+  selectedBangle,
+  onCreateBangle,
+  onDeleteBangle,
+  onUpdateBangle,
+  onSelectBangle,
+  onCloseBangle,
 }: DesktopLayoutProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string[]>([]);
@@ -83,6 +100,8 @@ export function DesktopLayout({
     Array<{ id: string; name: string; noteIds: number[] }>
   >([]);
   const [activeCollection, setActiveCollection] = useState<any | null>(null);
+  const [isCreateBangleOpen, setIsCreateBangleOpen] = useState(false);
+  const [bangleSourceNote, setBangleSourceNote] = useState<Note | null>(null);
 
   // Track mount status to prevent hydration mismatch
   useEffect(() => {
@@ -171,6 +190,20 @@ export function DesktopLayout({
     if (!newVisibility) {
       setActiveMood(null);
     }
+  };
+
+  const handleOpenCreateBangle = (note: Note) => {
+    setBangleSourceNote(note);
+    setIsCreateBangleOpen(true);
+  };
+
+  const handleCreateBangleComplete = (bangle: Bangle) => {
+    if (onCreateBangle) {
+      onCreateBangle(bangle);
+    }
+    setIsCreateBangleOpen(false);
+    setBangleSourceNote(null);
+    setSelectedNote(null); // Close note view after creating bangle
   };
 
   const handleTagsToggle = () => {
@@ -408,6 +441,49 @@ export function DesktopLayout({
               </button>
             </div>
           </div>
+
+          {/* Bangles Section */}
+          {bangles.length > 0 && (
+            <div className="mb-6">
+              {isMounted && !isSidebarCollapsed && (
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                  Bangles
+                </h3>
+              )}
+              <div
+                className={
+                  isMounted && isSidebarCollapsed ? "space-y-4" : "space-y-1"
+                }
+              >
+                {bangles.slice(0, isSidebarCollapsed ? 3 : 5).map((bangle) => (
+                  <button
+                    key={bangle.id}
+                    className={`w-full flex items-center ${
+                      isMounted && isSidebarCollapsed
+                        ? "justify-center"
+                        : "gap-2 px-3 py-2"
+                    } text-sm rounded-lg transition-colors ${
+                      selectedBangle?.id === bangle.id
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted"
+                    }`}
+                    onClick={() => onSelectBangle?.(bangle)}
+                    title={isMounted && isSidebarCollapsed ? bangle.title : ""}
+                  >
+                    <Layers className="w-5 h-5 flex-shrink-0" />
+                    {isMounted && !isSidebarCollapsed && (
+                      <span className="truncate">{bangle.title}</span>
+                    )}
+                  </button>
+                ))}
+                {bangles.length > (isSidebarCollapsed ? 3 : 5) && !isSidebarCollapsed && (
+                  <p className="text-xs text-muted-foreground px-3">
+                    +{bangles.length - 5} more
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -511,7 +587,22 @@ export function DesktopLayout({
         )}
 
         <div className="flex-1 overflow-hidden">
-          {selectedNote ? (
+          {selectedBangle ? (
+            <BangleViewer
+              bangle={selectedBangle}
+              notes={notes}
+              onClose={() => onCloseBangle?.()}
+              onDelete={onDeleteBangle}
+              onUpdate={onUpdateBangle}
+              onViewNote={(noteId) => {
+                const note = notes.find((n) => n.id === noteId);
+                if (note) {
+                  onCloseBangle?.();
+                  setSelectedNote(note);
+                }
+              }}
+            />
+          ) : selectedNote ? (
             <InlineNoteView
               note={selectedNote}
               onClose={() => setSelectedNote(null)}
@@ -538,6 +629,8 @@ export function DesktopLayout({
                 handleViewModeChange("collections");
                 setSelectedNote(null);
               }}
+              onCreateBangle={() => handleOpenCreateBangle(selectedNote)}
+              allNotes={notes}
             />
           ) : (
             <NoteSection
@@ -616,6 +709,19 @@ export function DesktopLayout({
           }}
           existingNotes={notes}
         />
+
+        {bangleSourceNote && (
+          <CreateBangleModal
+            isOpen={isCreateBangleOpen}
+            sourceNote={bangleSourceNote}
+            allNotes={notes}
+            onClose={() => {
+              setIsCreateBangleOpen(false);
+              setBangleSourceNote(null);
+            }}
+            onCreate={handleCreateBangleComplete}
+          />
+        )}
       </div>
     </div>
   );
