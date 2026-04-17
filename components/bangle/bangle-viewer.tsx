@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { X, Search, Calendar, Hash, Layers, Trash2, Edit2, Check } from "lucide-react"
+import { X, Search, Calendar, Hash, Layers, Trash2, Edit2, Check, ChevronDown } from "lucide-react"
 import { BangleAtomCard } from "./bangle-atom-card"
 import { getBangleAtoms, searchBangleContent, formatAtomCount } from "@/lib/bangle-utils"
 import { getTagColor } from "@/components/note-card"
@@ -30,6 +30,7 @@ export function BangleViewer({
   const [editedTitle, setEditedTitle] = useState(bangle.title)
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [editedDescription, setEditedDescription] = useState(bangle.description || "")
+  const [showTags, setShowTags] = useState(false)
 
   // Get atoms based on search query
   const atoms = useMemo(() => {
@@ -175,31 +176,39 @@ export function BangleViewer({
               <Layers className="w-3.5 h-3.5" />
               <span>{formatAtomCount(atoms.length)}</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setShowTags(!showTags)}
+              className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+            >
               <Hash className="w-3.5 h-3.5" />
               <span>{bangle.mergedTags.length} tags</span>
-            </div>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform ${showTags ? "rotate-180" : ""}`}
+              />
+            </button>
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               <span>Created {formatDate(bangle.createdAt)}</span>
             </div>
           </div>
 
-          {/* Merged tags */}
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {bangle.mergedTags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground"
-              >
+          {/* Merged tags - Collapsible */}
+          {showTags && (
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {bangle.mergedTags.map((tag) => (
                 <span
-                  className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: getTagColor(tag) }}
-                />
-                {tag}
-              </span>
-            ))}
-          </div>
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground"
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: getTagColor(tag) }}
+                  />
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Search */}
           <div className="relative">
