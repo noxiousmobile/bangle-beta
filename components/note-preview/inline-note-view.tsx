@@ -2,8 +2,9 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag } from "lucide-react"
+import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Layers } from "lucide-react"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
+import { getRelatedNotesCount } from "@/lib/bangle-utils"
 import { getTagColor } from "@/components/note-card"
 import Image from "next/image"
 import { RichTextEditor } from "@/components/rich-text-editor"
@@ -18,6 +19,8 @@ interface InlineNoteViewProps {
   onToggleFavourite?: (noteId: number) => void
   collectionName?: string | null
   onCollectionClick?: () => void
+  onCreateBangle?: () => void
+  allNotes?: Note[]
 }
 
 export function InlineNoteView({
@@ -30,6 +33,8 @@ export function InlineNoteView({
   onToggleFavourite,
   collectionName,
   onCollectionClick,
+  onCreateBangle,
+  allNotes = [],
 }: InlineNoteViewProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [isEditingContent, setIsEditingContent] = useState(false)
@@ -138,6 +143,21 @@ export function InlineNoteView({
         </div>
 
         <div className="flex items-center gap-1">
+          {onCreateBangle && allNotes.length > 1 && (
+            <button
+              onClick={onCreateBangle}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
+              title="Create a Bangle from related notes"
+            >
+              <Layers className="w-4 h-4" />
+              <span className="hidden sm:inline">Create Bangle</span>
+              {getRelatedNotesCount(note, allNotes) > 0 && (
+                <span className="text-xs bg-primary/20 px-1.5 py-0.5 rounded-full">
+                  {getRelatedNotesCount(note, allNotes)}
+                </span>
+              )}
+            </button>
+          )}
           <button
             onClick={() => onToggleFavourite?.(note.id)}
             className={`p-2 rounded-lg transition-colors ${
