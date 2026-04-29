@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, ChevronUp, Clock, ExternalLink, Edit2, Check, X } from "lucide-react"
+import { ChevronDown, ChevronUp, Clock, ExternalLink, Edit2 } from "lucide-react"
 import { getTagColor } from "@/components/note-card"
 import type { BangleAtom } from "@/lib/types"
 
@@ -28,16 +28,22 @@ export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateConte
   const contentPreview = getDisplayContent()
   const isLongContent = contentPreview.length > 200
 
-  const handleSaveEdit = () => {
+  const handleAutoSave = () => {
     if (onUpdateContent && editedContent.trim()) {
       onUpdateContent(atom.noteId, editedContent)
-      setIsEditing(false)
     }
+    setIsEditing(false)
   }
 
-  const handleCancelEdit = () => {
-    setEditedContent(atom.content)
-    setIsEditing(false)
+  const handleEditBlur = () => {
+    handleAutoSave()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Save on Ctrl+Enter or Cmd+Enter
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      handleAutoSave()
+    }
   }
 
   return (
@@ -94,30 +100,15 @@ export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateConte
           {isExpanded && (
             <div className="p-3">
               {isEditing ? (
-                <div className="space-y-3">
-                  <textarea
-                    value={editedContent}
-                    onChange={(e) => setEditedContent(e.target.value)}
-                    className="w-full min-h-[120px] p-2 bg-background border border-border rounded text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                    placeholder="Edit note content..."
-                  />
-                  <div className="flex gap-2 justify-end">
-                    <button
-                      onClick={handleCancelEdit}
-                      className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
-                      title="Cancel editing"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={handleSaveEdit}
-                      className="p-1.5 text-primary hover:bg-primary/10 rounded transition-colors"
-                      title="Save changes"
-                    >
-                      <Check className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+                <textarea
+                  value={editedContent}
+                  onChange={(e) => setEditedContent(e.target.value)}
+                  onBlur={handleEditBlur}
+                  onKeyDown={handleKeyDown}
+                  autoFocus
+                  className="w-full min-h-[120px] p-2 bg-background border border-border rounded text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                  placeholder="Edit note content..."
+                />
               ) : (
                 <div className="group">
                   <div 
