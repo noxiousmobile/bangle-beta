@@ -242,7 +242,7 @@ export function BangleViewer({
             </p>
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto">
+          <div>
             {atoms.map((atom, index) => (
               <BangleAtomCard
                 key={atom.noteId}
