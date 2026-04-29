@@ -69,6 +69,14 @@ export function BangleViewer({
     }
   }
 
+  const handleUpdateAtomContent = (noteId: number, newContent: string) => {
+    // Notify parent that atom content has been updated
+    // The parent component should handle syncing this back to the original note
+    if (onUpdate) {
+      onUpdate(bangle)
+    }
+  }
+
   const formatDate = (isoString: string) => {
     return new Date(isoString).toLocaleDateString("en-US", {
       month: "short",
@@ -241,6 +249,7 @@ export function BangleViewer({
                 atom={atom}
                 isLast={index === atoms.length - 1}
                 onViewNote={onViewNote}
+                onUpdateContent={handleUpdateAtomContent}
               />
             ))}
           </div>
