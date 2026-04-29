@@ -10,12 +10,15 @@ interface BangleAtomCardProps {
   isLast?: boolean
   onViewNote?: (noteId: number) => void
   onUpdateContent?: (noteId: number, newContent: string) => void
+  onUpdateTitle?: (noteId: number, newTitle: string) => void
 }
 
-export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateContent }: BangleAtomCardProps) {
+export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateContent, onUpdateTitle }: BangleAtomCardProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [editedContent, setEditedContent] = useState(atom.content)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [editedTitle, setEditedTitle] = useState(atom.title)
 
   // Parse content for display - handle HTML or plain text
   const getDisplayContent = () => {
@@ -46,6 +49,27 @@ export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateConte
     }
   }
 
+  const handleAutoSaveTitle = () => {
+    if (onUpdateTitle && editedTitle.trim()) {
+      onUpdateTitle(atom.noteId, editedTitle)
+    }
+    setIsEditingTitle(false)
+  }
+
+  const handleTitleBlur = () => {
+    handleAutoSaveTitle()
+  }
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Save on Enter or Escape to cancel
+    if (e.key === "Enter") {
+      handleAutoSaveTitle()
+    } else if (e.key === "Escape") {
+      setEditedTitle(atom.title)
+      setIsEditingTitle(false)
+    }
+  }
+
   return (
     <div className="relative flex gap-4">
       {/* Timeline connector */}
@@ -70,9 +94,26 @@ export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateConte
         <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-3 border-b border-border bg-muted/30">
-            <h4 className="font-medium text-sm text-foreground truncate flex-1">
-              {atom.title}
-            </h4>
+            {isEditingTitle ? (
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                onBlur={handleTitleBlur}
+                onKeyDown={handleTitleKeyDown}
+                autoFocus
+                className="flex-1 px-2 py-1 text-sm font-medium bg-background border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary/50"
+                placeholder="Edit title..."
+              />
+            ) : (
+              <h4
+                className="font-medium text-sm text-foreground truncate flex-1 cursor-pointer hover:text-primary transition-colors group"
+                onClick={() => setIsEditingTitle(true)}
+                title="Click to edit title"
+              >
+                {atom.title}
+              </h4>
+            )}
             <div className="flex items-center gap-1">
               {onViewNote && (
                 <button
