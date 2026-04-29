@@ -112,9 +112,13 @@ export function DesktopLayout({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
-      if (isAddNoteOpen || selectedNote) return;
+      // Don't open modal if any of these are active
+      if (isAddNoteOpen || selectedNote || selectedBangle) return;
+      
       const active = document.activeElement;
       const tag = active?.tagName ?? "";
+      
+      // Check if we're inside any editable context
       const isInteractiveElement =
         tag === "INPUT" ||
         tag === "TEXTAREA" ||
@@ -122,13 +126,21 @@ export function DesktopLayout({
         tag === "A" ||
         tag === "SELECT" ||
         (active as HTMLElement)?.isContentEditable;
-      if (isInteractiveElement) return;
+      
+      // Also check if any parent element is contenteditable
+      const isInsideContentEditable = !!(active as HTMLElement)?.closest?.('[contenteditable="true"]');
+      
+      if (isInteractiveElement || isInsideContentEditable) return;
+      
+      // Only trigger if focus is on body or main container (not on any interactive element)
+      if (active !== document.body && !active?.classList?.contains?.('note-section')) return;
+      
       e.preventDefault();
       setIsAddNoteOpen(true);
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isAddNoteOpen, selectedNote]);
+  }, [isAddNoteOpen, selectedNote, selectedBangle]);
 
   // Compute AI collections when notes change
   useEffect(() => {
