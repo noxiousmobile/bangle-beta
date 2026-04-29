@@ -2,23 +2,15 @@
 
 import { useState, useEffect } from "react";
 import {
-  Plus,
-  LayoutGrid,
-  Table,
-  Columns2,
-  Brain,
-  Tag,
-  X,
-  Clock,
-  BarChart2,
+  LogOut,
+  Home,
+  Zap,
+  Lightbulb,
+  History,
+  Grid3x3,
   Star,
-  Smile,
-  Share2,
-  Sparkles,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Download,
-  Settings,
+  Tag,
+  Layers,
 } from "lucide-react";
 import { NoteSection } from "@/components/note-section";
 import { TagFilters } from "@/components/note-section/tag-filters";
@@ -268,68 +260,6 @@ export function DesktopLayout({
         </div>
 
         <div className="flex-1 overflow-auto p-4">
-          <div className="mb-6">
-            {isMounted && !isSidebarCollapsed && (
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                View
-              </h3>
-            )}
-            <div
-              className={
-                isMounted && isSidebarCollapsed ? "space-y-4" : "space-y-1"
-              }
-            >
-              <button
-                className={`w-full flex items-center ${
-                  isMounted && isSidebarCollapsed
-                    ? "justify-center"
-                    : "gap-2 px-3 py-2"
-                } text-sm rounded-lg transition-colors ${
-                  viewMode === "grid"
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-                onClick={() => handleViewModeChange("grid")}
-                title={isMounted && isSidebarCollapsed ? "Grid" : ""}
-              >
-                <LayoutGrid className="w-5 h-5" />
-                {isMounted && !isSidebarCollapsed && "Grid"}
-              </button>
-              <button
-                className={`w-full flex items-center ${
-                  isMounted && isSidebarCollapsed
-                    ? "justify-center"
-                    : "gap-2 px-3 py-2"
-                } text-sm rounded-lg transition-colors ${
-                  viewMode === "table"
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-                onClick={() => handleViewModeChange("table")}
-                title={isMounted && isSidebarCollapsed ? "Table" : ""}
-              >
-                <Table className="w-5 h-5" />
-                {isMounted && !isSidebarCollapsed && "Table"}
-              </button>
-              <button
-                className={`w-full flex items-center ${
-                  isMounted && isSidebarCollapsed
-                    ? "justify-center"
-                    : "gap-2 px-3 py-2"
-                } text-sm rounded-lg transition-colors ${
-                  viewMode === "split"
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-                onClick={() => handleViewModeChange("split")}
-                title={isMounted && isSidebarCollapsed ? "Split" : ""}
-              >
-                <Columns2 className="w-5 h-5" />
-                {isMounted && !isSidebarCollapsed && "Split"}
-              </button>
-            </div>
-          </div>
-
           <div className="mb-6">
             {isMounted && !isSidebarCollapsed && (
               <h3 className="text-sm font-medium text-muted-foreground mb-3">

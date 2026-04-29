@@ -30,6 +30,7 @@ import {
   Table,
   Columns2,
   Check,
+  ChevronDown,
 } from "lucide-react";
 import Image from "next/image"; // Added for note image
 import { SmartCollectionsPanel } from "@/components/ai-insights/smart-collections-panel";
@@ -139,6 +140,7 @@ export function NoteSection({
   const [isMobileTagsFilterVisible, setIsMobileTagsFilterVisible] =
     useState(false);
   const [ignoreScroll, setIgnoreScroll] = useState(false);
+  const [isViewDropdownOpen, setIsViewDropdownOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isNotePreviewOpen, setIsNotePreviewOpen] = useState(false);
   const [splitViewSelectedNote, setSplitViewSelectedNote] =
@@ -1477,21 +1479,85 @@ export function NoteSection({
                   !activeCollection &&
                   !isDesktopTagsFilterVisible &&
                   !isMobileTagsFilterVisible && (
-                    <button
-                      className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full shadow-sm transition-colors ${
-                        showTagNames
-                          ? "bg-blue-50 text-blue-600 border border-blue-200"
-                          : "text-gray-600 bg-white hover:bg-gray-50"
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleTagNames();
-                      }}
-                      title={showTagNames ? "Hide tag names" : "Show tag names"}
-                    >
-                      <Tag className="w-3.5 h-3.5" />
-                      <span>{showTagNames ? "Hide Tags" : "Show Tags"}</span>
-                    </button>
+                    <>
+                      {/* View Mode Dropdown */}
+                      <div className="relative">
+                        <button
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full shadow-sm transition-colors text-gray-600 bg-white hover:bg-gray-50"
+                          onClick={() => setIsViewDropdownOpen(!isViewDropdownOpen)}
+                          title="Change view mode"
+                        >
+                          {viewMode === "grid" && <LayoutGrid className="w-3.5 h-3.5" />}
+                          {viewMode === "table" && <Table className="w-3.5 h-3.5" />}
+                          {viewMode === "split" && <Columns2 className="w-3.5 h-3.5" />}
+                          <span className="capitalize">{viewMode}</span>
+                          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isViewDropdownOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        {isViewDropdownOpen && (
+                          <div className="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[140px]">
+                            <button
+                              onClick={() => {
+                                onViewChange("grid");
+                                setIsViewDropdownOpen(false);
+                              }}
+                              className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                                viewMode === "grid"
+                                  ? "bg-blue-50 text-blue-600"
+                                  : "text-gray-700 hover:bg-gray-50"
+                              }`}
+                            >
+                              <LayoutGrid className="w-3.5 h-3.5" />
+                              Grid
+                            </button>
+                            <button
+                              onClick={() => {
+                                onViewChange("table");
+                                setIsViewDropdownOpen(false);
+                              }}
+                              className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                                viewMode === "table"
+                                  ? "bg-blue-50 text-blue-600"
+                                  : "text-gray-700 hover:bg-gray-50"
+                              }`}
+                            >
+                              <Table className="w-3.5 h-3.5" />
+                              Table
+                            </button>
+                            <button
+                              onClick={() => {
+                                onViewChange("split");
+                                setIsViewDropdownOpen(false);
+                              }}
+                              className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                                viewMode === "split"
+                                  ? "bg-blue-50 text-blue-600"
+                                  : "text-gray-700 hover:bg-gray-50"
+                              }`}
+                            >
+                              <Columns2 className="w-3.5 h-3.5" />
+                              Split
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Show/Hide Tags Button */}
+                      <button
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full shadow-sm transition-colors ${
+                          showTagNames
+                            ? "bg-blue-50 text-blue-600 border border-blue-200"
+                            : "text-gray-600 bg-white hover:bg-gray-50"
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleTagNames();
+                        }}
+                        title={showTagNames ? "Hide tag names" : "Show tag names"}
+                      >
+                        <Tag className="w-3.5 h-3.5" />
+                        <span>{showTagNames ? "Hide Tags" : "Show Tags"}</span>
+                      </button>
+                    </>
                   )}
 
                 {expanded &&
