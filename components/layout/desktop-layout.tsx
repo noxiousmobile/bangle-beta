@@ -11,6 +11,7 @@ import {
   Star,
   Tag,
   Layers,
+  PanelLeftClose,
 } from "lucide-react";
 import { NoteSection } from "@/components/note-section";
 import { TagFilters } from "@/components/note-section/tag-filters";
