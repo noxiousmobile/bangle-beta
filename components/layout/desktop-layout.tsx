@@ -26,7 +26,6 @@ import type { Note } from "@/lib/data";
 import type { PanInfo } from "framer-motion";
 import type { ViewMode, Bangle } from "@/lib/types";
 import { BangleViewer, BangleList, CreateBangleModal } from "@/components/bangle";
-import { Layers } from "lucide-react";
 
 interface DesktopLayoutProps {
   notes: Note[];
