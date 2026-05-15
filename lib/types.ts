@@ -1,4 +1,31 @@
-export type ViewMode = "grid" | "table" | "split" | "collections"
+export type ViewMode = "grid" | "table" | "split" | "collections" | "brain"
+
+// Brain graph types
+export interface GraphNode {
+  id: string
+  type: "note" | "tag" | "collection"
+  label: string
+  color: string
+  size: number
+  data: unknown // Original data reference (Note, Collection, or tag string)
+  x?: number
+  y?: number
+  fx?: number | null
+  fy?: number | null
+}
+
+export interface GraphLink {
+  source: string
+  target: string
+  type: "note-tag" | "note-collection" | "tag-cooccurrence"
+  strength: number
+  color: string
+}
+
+export interface BrainGraphData {
+  nodes: GraphNode[]
+  links: GraphLink[]
+}
 
 // Bangle types - connected note flows
 export interface Bangle {

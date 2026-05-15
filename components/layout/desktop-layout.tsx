@@ -34,7 +34,9 @@ import type { Note } from "@/lib/data";
 import type { PanInfo } from "framer-motion";
 import type { ViewMode, Bangle } from "@/lib/types";
 import { BangleViewer, BangleList, CreateBangleModal } from "@/components/bangle";
+import { BrainView } from "@/components/brain";
 import { Layers } from "lucide-react";
+import type { Collection } from "@/lib/brain-utils";
 
 interface DesktopLayoutProps {
   notes: Note[];
@@ -327,6 +329,22 @@ export function DesktopLayout({
                 <Columns2 className="w-5 h-5" />
                 {isMounted && !isSidebarCollapsed && "Split"}
               </button>
+              <button
+                className={`w-full flex items-center ${
+                  isMounted && isSidebarCollapsed
+                    ? "justify-center"
+                    : "gap-2 px-3 py-2"
+                } text-sm rounded-lg transition-colors ${
+                  viewMode === "brain"
+                    ? "bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-400"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+                onClick={() => handleViewModeChange("brain")}
+                title={isMounted && isSidebarCollapsed ? "Brain" : ""}
+              >
+                <Brain className="w-5 h-5" />
+                {isMounted && !isSidebarCollapsed && "Brain"}
+              </button>
             </div>
           </div>
 
@@ -599,7 +617,22 @@ export function DesktopLayout({
         )}
 
         <div className="flex-1 overflow-hidden">
-          {selectedBangle ? (
+          {viewMode === "brain" ? (
+            <BrainView
+              notes={notes}
+              collections={collections.map((c) => ({
+                id: c.id,
+                name: c.name,
+                noteIds: c.noteIds,
+                color: c.color,
+              }))}
+              onNoteClick={(note) => {
+                setSelectedNote(note);
+                handleViewModeChange("grid");
+              }}
+              onClose={() => handleViewModeChange("grid")}
+            />
+          ) : selectedBangle ? (
             <BangleViewer
               bangle={selectedBangle}
               notes={notes}
