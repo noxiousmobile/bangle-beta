@@ -626,10 +626,8 @@ export function DesktopLayout({
                 noteIds: c.noteIds,
                 color: c.color,
               }))}
-              onNoteClick={(note) => {
-                setSelectedNote(note);
-                handleViewModeChange("grid");
-              }}
+              onNoteDelete={onNoteDelete}
+              onNoteSaved={onNoteSaved}
               onClose={() => handleViewModeChange("grid")}
             />
           ) : selectedBangle ? (

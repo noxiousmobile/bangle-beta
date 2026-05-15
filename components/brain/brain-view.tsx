@@ -14,6 +14,7 @@ import {
   type Collection,
 } from "@/lib/brain-utils"
 import { getTagColor } from "@/components/note-card"
+import { InlineNoteView } from "@/components/note-preview/inline-note-view"
 
 // Dynamically import ForceGraph2D to avoid SSR issues
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
@@ -29,6 +30,8 @@ interface BrainViewProps {
   notes: Note[]
   collections?: Collection[]
   onNoteClick?: (note: Note) => void
+  onNoteDelete?: (noteId: number) => void
+  onNoteSaved?: (note: Note) => void
   onClose?: () => void
 }
 
@@ -36,6 +39,8 @@ export function BrainView({
   notes,
   collections = [],
   onNoteClick,
+  onNoteDelete,
+  onNoteSaved,
   onClose,
 }: BrainViewProps) {
   const graphRef = useRef<any>(null)
@@ -45,6 +50,8 @@ export function BrainView({
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null)
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
   const [showStats, setShowStats] = useState(true)
+  const [selectedTagFilter, setSelectedTagFilter] = useState<string | null>(null)
+  const [viewingNote, setViewingNote] = useState<Note | null>(null)
 
   // Build graph data
   const graphData = useMemo(
@@ -52,11 +59,18 @@ export function BrainView({
     [notes, collections]
   )
 
-  // Filter results
-  const { filteredNodes, hasFilter } = useMemo(
-    () => filterGraphBySearch(graphData, searchQuery),
-    [graphData, searchQuery]
-  )
+  // Filter results (search query or tag filter)
+  const { filteredNodes, hasFilter } = useMemo(() => {
+    // If tag filter is active, filter by tag connections
+    if (selectedTagFilter) {
+      const tagNodeId = `tag-${selectedTagFilter}`
+      const connectedToTag = findConnectedNodes(tagNodeId, graphData.links)
+      connectedToTag.add(tagNodeId) // Include the tag itself
+      return { filteredNodes: connectedToTag, hasFilter: true }
+    }
+    // Otherwise use search query
+    return filterGraphBySearch(graphData, searchQuery)
+  }, [graphData, searchQuery, selectedTagFilter])
 
   // Get stats
   const stats = useMemo(() => getGraphStats(graphData), [graphData])
@@ -114,14 +128,35 @@ export function BrainView({
     (node: GraphNode) => {
       setSelectedNode(node)
       
-      if (node.type === "note" && onNoteClick) {
+      if (node.type === "note") {
+        // Open note in modal
         const noteData = getNoteFromNode(node)
         if (noteData) {
-          onNoteClick(noteData)
+          setViewingNote(noteData)
+        }
+      } else if (node.type === "tag") {
+        // Toggle tag filter - if same tag clicked, clear filter
+        const tagName = node.label
+        if (selectedTagFilter === tagName) {
+          setSelectedTagFilter(null)
+          setSearchQuery("")
+        } else {
+          setSelectedTagFilter(tagName)
+          setSearchQuery("") // Clear search when filtering by tag
+        }
+      } else if (node.type === "collection") {
+        // Filter by collection - show all notes in this collection
+        const collectionName = node.label
+        if (selectedTagFilter === `collection:${collectionName}`) {
+          setSelectedTagFilter(null)
+        } else {
+          // Use the collection's connected nodes as filter
+          setSelectedTagFilter(null)
+          setSearchQuery(collectionName) // Search by collection name
         }
       }
     },
-    [onNoteClick]
+    [selectedTagFilter]
   )
 
   // Node hover handlers
@@ -466,9 +501,58 @@ export function BrainView({
             {hoveredNode.type === "note" && (
               <div className="text-xs text-gray-400 mt-1">Click to view note</div>
             )}
+            {hoveredNode.type === "tag" && (
+              <div className="text-xs text-gray-400 mt-1">Click to filter by tag</div>
+            )}
+            {hoveredNode.type === "collection" && (
+              <div className="text-xs text-gray-400 mt-1">Click to filter collection</div>
+            )}
+          </div>
+        )}
+
+        {/* Active tag filter indicator */}
+        {selectedTagFilter && (
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: getTagColor(selectedTagFilter) }}
+            />
+            <span className="text-sm text-gray-700">Filtering: {selectedTagFilter}</span>
+            <button
+              onClick={() => setSelectedTagFilter(null)}
+              className="ml-1 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>
+
+      {/* Note Modal Overlay */}
+      {viewingNote && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden mx-4">
+            <InlineNoteView
+              note={viewingNote}
+              onClose={() => setViewingNote(null)}
+              onDelete={(noteId) => {
+                onNoteDelete?.(noteId)
+                setViewingNote(null)
+              }}
+              onSave={(noteId, updatedData) => {
+                // Merge updates with existing note and call onNoteSaved
+                const updatedNote: Note = {
+                  ...viewingNote,
+                  ...updatedData,
+                }
+                onNoteSaved?.(updatedNote)
+                setViewingNote(updatedNote) // Update local state too
+              }}
+              allNotes={notes}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
