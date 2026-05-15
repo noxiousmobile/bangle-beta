@@ -190,7 +190,7 @@ export function BrainView({
         ctx.font = `${fontSize}px Inter, system-ui, sans-serif`
         ctx.textAlign = "center"
         ctx.textBaseline = "top"
-        ctx.fillStyle = "#ffffff"
+        ctx.fillStyle = "#374151"
         
         // Truncate label if too long
         const maxLength = type === "tag" ? 15 : 20
@@ -243,9 +243,9 @@ export function BrainView({
   )
 
   return (
-    <div className="flex flex-col h-full bg-[#0a0a0f] relative overflow-hidden">
+      <div className="flex flex-col h-full bg-[#f5f5f7] relative overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/40 backdrop-blur-sm z-10">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white z-10">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
             <svg
@@ -263,8 +263,8 @@ export function BrainView({
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white">Brain</h1>
-            <p className="text-xs text-white/50">
+            <h1 className="text-lg font-semibold text-gray-900">Brain</h1>
+            <p className="text-xs text-gray-500">
               {stats.noteCount} notes, {stats.tagCount} tags, {stats.totalConnections} connections
             </p>
           </div>
@@ -273,18 +273,18 @@ export function BrainView({
         {/* Search */}
         <div className="flex-1 max-w-md mx-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search nodes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              className="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -298,41 +298,41 @@ export function BrainView({
             onClick={() => setShowStats(!showStats)}
             className={`p-2 rounded-lg transition-colors ${
               showStats
-                ? "bg-purple-500/20 text-purple-400"
-                : "text-white/50 hover:bg-white/10"
+                ? "bg-purple-500/20 text-purple-600"
+                : "text-gray-500 hover:bg-gray-100"
             }`}
             title="Toggle stats panel"
           >
             <Info className="w-5 h-5" />
           </button>
-          <div className="w-px h-6 bg-white/10" />
+          <div className="w-px h-6 bg-gray-200" />
           <button
             onClick={handleZoomOut}
-            className="p-2 text-white/50 hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
             title="Zoom out"
           >
             <ZoomOut className="w-5 h-5" />
           </button>
           <button
             onClick={handleZoomIn}
-            className="p-2 text-white/50 hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
             title="Zoom in"
           >
             <ZoomIn className="w-5 h-5" />
           </button>
           <button
             onClick={handleFitToScreen}
-            className="p-2 text-white/50 hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
             title="Fit to screen"
           >
             <Maximize2 className="w-5 h-5" />
           </button>
           {onClose && (
             <>
-              <div className="w-px h-6 bg-white/10" />
+              <div className="w-px h-6 bg-gray-200" />
               <button
                 onClick={onClose}
-                className="p-2 text-white/50 hover:bg-white/10 rounded-lg transition-colors"
+                className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Close"
               >
                 <X className="w-5 h-5" />
@@ -358,15 +358,15 @@ export function BrainView({
           d3AlphaDecay={0.02}
           d3VelocityDecay={0.3}
           cooldownTime={3000}
-          backgroundColor="#0a0a0f"
+              backgroundColor="#f5f5f7"
           enableNodeDrag={true}
           enableZoomInteraction={true}
           enablePanInteraction={true}
         />
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg p-3 text-xs text-white/70">
-          <div className="font-medium text-white mb-2">Legend</div>
+        <div className="absolute bottom-4 left-4 bg-white border border-gray-200 rounded-lg p-3 text-xs text-gray-600 shadow-sm">
+          <div className="font-medium text-gray-900 mb-2">Legend</div>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
@@ -385,31 +385,31 @@ export function BrainView({
 
         {/* Stats Panel */}
         {showStats && (
-          <div className="absolute top-4 right-4 w-64 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg p-4 text-white">
+          <div className="absolute top-4 right-4 w-64 bg-white border border-gray-200 rounded-lg p-4 text-gray-900 shadow-sm">
             <h3 className="font-medium text-sm mb-3">Graph Insights</h3>
             
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-white/5 rounded-lg p-2 text-center">
-                <div className="text-lg font-semibold text-blue-400">{stats.noteCount}</div>
-                <div className="text-xs text-white/50">Notes</div>
+              <div className="bg-gray-50 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold text-blue-600">{stats.noteCount}</div>
+                <div className="text-xs text-gray-500">Notes</div>
               </div>
-              <div className="bg-white/5 rounded-lg p-2 text-center">
-                <div className="text-lg font-semibold text-green-400">{stats.tagCount}</div>
-                <div className="text-xs text-white/50">Tags</div>
+              <div className="bg-gray-50 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold text-green-600">{stats.tagCount}</div>
+                <div className="text-xs text-gray-500">Tags</div>
               </div>
-              <div className="bg-white/5 rounded-lg p-2 text-center">
-                <div className="text-lg font-semibold text-purple-400">{stats.collectionCount}</div>
-                <div className="text-xs text-white/50">Collections</div>
+              <div className="bg-gray-50 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold text-purple-600">{stats.collectionCount}</div>
+                <div className="text-xs text-gray-500">Collections</div>
               </div>
-              <div className="bg-white/5 rounded-lg p-2 text-center">
-                <div className="text-lg font-semibold text-orange-400">{stats.connectionDensity}</div>
-                <div className="text-xs text-white/50">Density</div>
+              <div className="bg-gray-50 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold text-orange-600">{stats.connectionDensity}</div>
+                <div className="text-xs text-gray-500">Density</div>
               </div>
             </div>
 
             {stats.topTags.length > 0 && (
               <div className="mb-4">
-                <div className="text-xs text-white/50 mb-2">Top Tags</div>
+                <div className="text-xs text-gray-500 mb-2">Top Tags</div>
                 <div className="space-y-1">
                   {stats.topTags.map(({ tag, count }) => (
                     <div
@@ -421,9 +421,9 @@ export function BrainView({
                           className="w-2 h-2 rounded-full"
                           style={{ backgroundColor: getTagColor(tag) }}
                         />
-                        <span className="text-white/80">{tag}</span>
+                        <span className="text-gray-700">{tag}</span>
                       </div>
-                      <span className="text-white/40">{count} notes</span>
+                      <span className="text-gray-400">{count} notes</span>
                     </div>
                   ))}
                 </div>
@@ -432,17 +432,17 @@ export function BrainView({
 
             {stats.orphanNotes.length > 0 && (
               <div>
-                <div className="text-xs text-white/50 mb-2">
+                <div className="text-xs text-gray-500 mb-2">
                   Untagged Notes ({stats.orphanNotes.length})
                 </div>
-                <div className="text-xs text-white/40 max-h-20 overflow-y-auto">
+                <div className="text-xs text-gray-400 max-h-20 overflow-y-auto">
                   {stats.orphanNotes.slice(0, 5).map((title, i) => (
                     <div key={i} className="truncate">
                       {title}
                     </div>
                   ))}
                   {stats.orphanNotes.length > 5 && (
-                    <div className="text-white/30">
+                    <div className="text-gray-400">
                       +{stats.orphanNotes.length - 5} more
                     </div>
                   )}
@@ -455,16 +455,16 @@ export function BrainView({
         {/* Tooltip for hovered node */}
         {hoveredNode && (
           <div
-            className="absolute pointer-events-none bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2 text-sm text-white max-w-xs"
+            className="absolute pointer-events-none bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 max-w-xs shadow-lg"
             style={{
               left: Math.min((hoveredNode.x || 0) + dimensions.width / 2 + 15, dimensions.width - 200),
               top: Math.min((hoveredNode.y || 0) + dimensions.height / 2 - 10, dimensions.height - 100),
             }}
           >
             <div className="font-medium">{hoveredNode.label}</div>
-            <div className="text-xs text-white/50 capitalize">{hoveredNode.type}</div>
+            <div className="text-xs text-gray-500 capitalize">{hoveredNode.type}</div>
             {hoveredNode.type === "note" && (
-              <div className="text-xs text-white/40 mt-1">Click to view note</div>
+              <div className="text-xs text-gray-400 mt-1">Click to view note</div>
             )}
           </div>
         )}

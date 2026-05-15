@@ -161,7 +161,7 @@ export function buildGraphData(
             target: `tag-${coTag}`,
             type: "tag-cooccurrence",
             strength: Math.min(coCount / 5, 1),
-            color: "#ffffff20", // Very subtle white
+            color: "#00000025", // Subtle dark for light background
           })
         }
       }
