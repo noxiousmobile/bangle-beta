@@ -28,7 +28,6 @@ import { CircularAddModal } from "@/components/add-section/circular-add-modal";
 import { GoogleKeepImportModal } from "@/components/import/google-keep-import-modal";
 import { aiOrganizationEngine } from "@/lib/ai/organization-engine";
 import { InlineNoteView } from "@/components/note-preview/inline-note-view";
-import { ContextSearchModal } from "@/components/search/context-search-modal";
 import type { Note } from "@/lib/data";
 import type { PanInfo } from "framer-motion";
 import type { ViewMode, Bangle } from "@/lib/types";
@@ -101,7 +100,6 @@ export function DesktopLayout({
   const [activeCollection, setActiveCollection] = useState<any | null>(null);
   const [isCreateBangleOpen, setIsCreateBangleOpen] = useState(false);
   const [bangleSourceNote, setBangleSourceNote] = useState<Note | null>(null);
-  const [isContextSearchOpen, setIsContextSearchOpen] = useState(false);
 
   // Track mount status to prevent hydration mismatch
   useEffect(() => {
@@ -141,18 +139,6 @@ export function DesktopLayout({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isAddNoteOpen, selectedNote, selectedBangle]);
-
-  // Cmd+K to open context search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setIsContextSearchOpen(true);
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   // Compute AI collections when notes change
   useEffect(() => {
@@ -741,14 +727,6 @@ export function DesktopLayout({
             onCreate={handleCreateBangleComplete}
           />
         )}
-
-        <ContextSearchModal
-          isOpen={isContextSearchOpen}
-          onClose={() => setIsContextSearchOpen(false)}
-          notes={notes}
-          onNoteDelete={onNoteDelete}
-          onNoteSaved={onNoteSaved}
-        />
       </div>
     </div>
   );

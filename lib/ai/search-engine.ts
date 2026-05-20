@@ -159,6 +159,11 @@ class AISearchEngine {
       creative: ["design", "art", "writing", "inspiration", "ideas", "photography"],
       shopping: ["buy", "purchase", "store", "product", "price", "deal"],
       home: ["house", "renovation", "decoration", "furniture", "garden", "cleaning"],
+      startup: ["business", "ideas", "pitch", "investors", "saas", "product", "launch", "funding", "mvp", "market"],
+      ideas: ["startup", "project", "creative", "brainstorm", "concept", "plan", "innovation"],
+      pitch: ["investors", "deck", "presentation", "startup", "funding", "slides", "business"],
+      marketing: ["growth", "acquisition", "launch", "strategy", "campaign", "customers", "ads"],
+      investors: ["pitch", "funding", "startup", "capital", "sequoia", "vc", "meeting"],
     }
 
     // Check if query matches semantic concepts
@@ -183,9 +188,12 @@ class AISearchEngine {
     // Intent-based search understanding
     const intentPatterns = {
       "how to": ["tutorial", "guide", "education", "learning"],
-      best: ["recommendation", "top", "favorite", "good"],
+      best: ["recommendation", "top", "favorite", "good", "ideas"],
       "ideas for": ["inspiration", "creative", "brainstorm", "planning"],
       "list of": ["collection", "items", "resources", "links"],
+      startup: ["ideas", "pitch", "investors", "business", "saas", "launch", "funding"],
+      last: ["recent", "week", "month", "year", "ago"],
+      year: ["recent", "2024", "2025", "annual", "yearly"],
     }
 
     for (const [intent, keywords] of Object.entries(intentPatterns)) {

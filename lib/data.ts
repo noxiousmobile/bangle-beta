@@ -388,6 +388,86 @@ export const recentNotes: StrictNote[] = [
     content:
       "Career Path Decision:\n\nAI/Machine Learning:\nPros:\n- High demand, cutting-edge\n- Excellent salaries ($150k+)\n- Intellectually challenging\n- Future-proof career\n\nCons:\n- Steep learning curve (math heavy)\n- Requires advanced degree?\n- Fewer job openings than web dev\n- Rapidly changing field\n\nWeb Development:\nPros:\n- Easier to start\n- More job opportunities\n- Immediate results\n- Strong community\n- Can freelance easily\n\nCons:\n- More competition\n- Lower average salary\n- Fast-changing frameworks\n\nDecision:\nWhy not both? Learn web dev first (6 months), then add AI skills. Many web apps now integrate AI features!",
   },
+  // STARTUP IDEAS & BUSINESS NOTES
+  {
+    id: 36,
+    title: "SaaS startup idea - AI meeting assistant",
+    tags: ["startup", "ideas", "saas", "ai", "business"],
+    image: "/placeholder.svg",
+    date: "2 weeks ago",
+    category: "work",
+    type: "text" as const,
+    content:
+      "Startup Idea: AI Meeting Assistant\n\nProblem:\n- People spend 31 hours/month in meetings\n- Most meetings are unproductive\n- Action items get lost\n\nSolution:\n- AI that joins meetings automatically\n- Real-time transcription\n- Automatic action item extraction\n- Follow-up email drafts\n- Integration with calendar & tasks\n\nMarket Size: $15B meeting software market\n\nCompetitors:\n- Otter.ai (transcription only)\n- Fireflies.ai (similar but basic)\n\nDifferentiator: Focus on ACTION, not just notes\n\nMVP Timeline: 3 months\nInitial Investment: $50k",
+  },
+  {
+    id: 37,
+    title: "E-commerce for sustainable products",
+    tags: ["startup", "ideas", "ecommerce", "sustainable", "business"],
+    image: "/placeholder.svg",
+    date: "3 weeks ago",
+    category: "work",
+    type: "text" as const,
+    content:
+      "Startup Idea: Eco-Friendly Marketplace\n\nConcept:\n- Curated marketplace for sustainable products\n- Carbon footprint tracking for each purchase\n- Verified eco-certifications\n- Monthly subscription boxes\n\nCategories:\n- Home goods (bamboo, recycled)\n- Personal care (zero waste)\n- Fashion (ethical brands)\n- Food (organic, local)\n\nRevenue Model:\n- 15% commission on sales\n- Premium seller subscriptions\n- Subscription box revenue\n\nTarget: Millennials & Gen Z who care about environment\n\nValidation: Survey showed 73% would pay more for sustainable",
+  },
+  {
+    id: 38,
+    title: "Pitch deck template - investor ready",
+    tags: ["startup", "pitch", "investors", "template", "business"],
+    image: "/placeholder.svg",
+    date: "1 month ago",
+    category: "work",
+    type: "text" as const,
+    content:
+      "Investor Pitch Deck Structure:\n\n1. Title Slide\n- Company name, tagline, logo\n\n2. Problem (1-2 slides)\n- Pain point with data\n- Who experiences this\n\n3. Solution (1-2 slides)\n- How you solve it\n- Demo or screenshots\n\n4. Market Size\n- TAM, SAM, SOM\n- Growth projections\n\n5. Business Model\n- How you make money\n- Pricing strategy\n\n6. Traction\n- Users, revenue, growth rate\n- Key milestones\n\n7. Competition\n- Landscape analysis\n- Your differentiation\n\n8. Team\n- Founders background\n- Key hires needed\n\n9. Financials\n- 3-year projections\n- Key metrics\n\n10. Ask\n- Funding amount\n- Use of funds\n\nKeep it under 15 slides!",
+  },
+  {
+    id: 39,
+    title: "Investor meeting notes - Sequoia feedback",
+    tags: ["startup", "investors", "feedback", "pitch", "meetings"],
+    image: "/placeholder.svg",
+    date: "1 month ago",
+    category: "work",
+    type: "text" as const,
+    content:
+      "Sequoia Partner Meeting - Feedback:\n\nWhat they liked:\n- Clear problem definition\n- Strong founding team\n- Early traction numbers\n- Large market opportunity\n\nConcerns raised:\n- Customer acquisition cost too high\n- Need more clarity on unit economics\n- Competition from big players\n- Path to profitability unclear\n\nAction items:\n1. Reduce CAC by 30% before next meeting\n2. Prepare detailed financial model\n3. Interview 20 more customers\n4. Research competitive moat strategies\n\nNext steps:\n- Follow up in 6 weeks with updated metrics\n- Send monthly investor update\n- Connect with their portfolio company for advice",
+  },
+  {
+    id: 40,
+    title: "Marketing strategy for product launch",
+    tags: ["marketing", "strategy", "launch", "growth", "startup"],
+    image: "/placeholder.svg",
+    date: "2 weeks ago",
+    category: "work",
+    type: "text" as const,
+    content:
+      "Product Launch Marketing Plan:\n\nPre-Launch (4 weeks before):\n- Build email waitlist (goal: 5,000)\n- Create teaser content on social\n- Reach out to 50 influencers\n- Write 10 blog posts for SEO\n\nLaunch Week:\n- Product Hunt launch (Tuesday)\n- Press release to tech blogs\n- Email blast to waitlist\n- Social media blitz\n- Live demo webinar\n\nPost-Launch:\n- User testimonial collection\n- Case study creation\n- Paid ads (Facebook, Google)\n- Content marketing ramp-up\n\nBudget: $10,000\n- Influencers: $3,000\n- Paid ads: $4,000\n- PR: $2,000\n- Tools: $1,000\n\nGoal: 1,000 paying users in first month",
+  },
+  {
+    id: 41,
+    title: "Google Drive links - pitch materials",
+    tags: ["resources", "links", "pitch", "drive", "startup"],
+    image: "/placeholder.svg",
+    date: "3 weeks ago",
+    category: "work",
+    type: "url" as const,
+    url: "https://drive.google.com/pitch-materials",
+    content:
+      "Pitch Materials Folder:\n\n- Final Pitch Deck (v3.2).pptx\n- Financial Model 2024.xlsx\n- Market Research Report.pdf\n- Competitor Analysis.xlsx\n- Demo Video (2 min).mp4\n- One-Pager for investors.pdf\n- Team bios and headshots\n- Product screenshots (hi-res)\n- Press kit materials\n- Legal documents (NDA template)",
+  },
+  {
+    id: 42,
+    title: "Marketing slides - customer acquisition",
+    tags: ["marketing", "slides", "acquisition", "growth", "presentation"],
+    image: "/placeholder.svg",
+    date: "1 month ago",
+    category: "work",
+    type: "url" as const,
+    url: "https://docs.google.com/presentation/marketing-strategy",
+    content:
+      "Customer Acquisition Strategy Presentation:\n\nSlide topics:\n1. Current funnel analysis\n2. Channel performance breakdown\n3. CAC by channel comparison\n4. LTV:CAC ratio improvement\n5. Organic growth strategies\n6. Paid acquisition roadmap\n7. Referral program design\n8. Partnership opportunities\n9. 90-day action plan\n10. Budget allocation\n\nKey metrics to improve:\n- CAC from $50 to $30\n- Conversion rate 2% to 4%\n- Referral rate 5% to 15%",
+  },
 ]
 
 export interface Note {
