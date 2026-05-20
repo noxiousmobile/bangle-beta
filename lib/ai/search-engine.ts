@@ -147,8 +147,8 @@ class AISearchEngine {
   private calculateSemanticScore(query: string, queryTerms: string[], note: any): number {
     let score = 0
 
-    // Semantic mappings for common concepts
-    const semanticMappings = {
+    // Semantic mappings - bidirectional relationships
+    const semanticMappings: Record<string, string[]> = {
       work: ["project", "meeting", "client", "business", "office", "task", "deadline"],
       learning: ["study", "course", "education", "tutorial", "skill", "practice"],
       health: ["fitness", "exercise", "diet", "wellness", "medical", "workout"],
@@ -159,51 +159,62 @@ class AISearchEngine {
       creative: ["design", "art", "writing", "inspiration", "ideas", "photography"],
       shopping: ["buy", "purchase", "store", "product", "price", "deal"],
       home: ["house", "renovation", "decoration", "furniture", "garden", "cleaning"],
-      startup: ["business", "ideas", "pitch", "investors", "saas", "product", "launch", "funding", "mvp", "market"],
-      ideas: ["startup", "project", "creative", "brainstorm", "concept", "plan", "innovation"],
+      startup: ["business", "ideas", "pitch", "investors", "saas", "product", "launch", "funding", "mvp", "market", "entrepreneur"],
+      ideas: ["startup", "project", "creative", "brainstorm", "concept", "plan", "innovation", "business", "saas"],
       pitch: ["investors", "deck", "presentation", "startup", "funding", "slides", "business"],
       marketing: ["growth", "acquisition", "launch", "strategy", "campaign", "customers", "ads"],
       investors: ["pitch", "funding", "startup", "capital", "sequoia", "vc", "meeting"],
+      year: ["recent", "2024", "2025", "month", "week", "ago"],
+      recent: ["year", "month", "week", "ago", "new", "latest"],
     }
 
-    // Check if query matches semantic concepts
-    for (const [concept, relatedTerms] of Object.entries(semanticMappings)) {
-      if (query.includes(concept) || queryTerms.some((term) => relatedTerms.includes(term))) {
-        // Check if note contains related terms
-        const noteText = `${note.title} ${note.tags.join(" ")} ${note.category}`.toLowerCase()
+    const noteText = `${note.title} ${note.tags.join(" ")} ${note.category} ${note.content || ""}`.toLowerCase()
+    const noteTags = note.tags.map((t: string) => t.toLowerCase())
 
-        for (const relatedTerm of relatedTerms) {
-          if (noteText.includes(relatedTerm)) {
-            score += 20
-          }
-        }
-
-        // Check if note category or tags match the concept
-        if (note.category.toLowerCase() === concept || note.tags.some((tag: string) => tag.toLowerCase() === concept)) {
-          score += 30
+    // Step 1: Find all concepts mentioned in the query
+    const matchedConcepts: string[] = []
+    for (const term of queryTerms) {
+      // Check if the term IS a concept
+      if (semanticMappings[term]) {
+        matchedConcepts.push(term)
+      }
+      // Check if the term is related to any concept
+      for (const [concept, relatedTerms] of Object.entries(semanticMappings)) {
+        if (relatedTerms.includes(term)) {
+          matchedConcepts.push(concept)
         }
       }
     }
 
-    // Intent-based search understanding
-    const intentPatterns = {
-      "how to": ["tutorial", "guide", "education", "learning"],
-      best: ["recommendation", "top", "favorite", "good", "ideas"],
-      "ideas for": ["inspiration", "creative", "brainstorm", "planning"],
-      "list of": ["collection", "items", "resources", "links"],
-      startup: ["ideas", "pitch", "investors", "business", "saas", "launch", "funding"],
-      last: ["recent", "week", "month", "year", "ago"],
-      year: ["recent", "2024", "2025", "annual", "yearly"],
+    // Step 2: For each matched concept, check if note relates to it
+    for (const concept of matchedConcepts) {
+      const relatedTerms = semanticMappings[concept] || []
+      const allRelated = [concept, ...relatedTerms]
+
+      // Check if note tags match concept or related terms
+      for (const tag of noteTags) {
+        if (allRelated.includes(tag)) {
+          score += 35
+        }
+      }
+
+      // Check if note title/content contains related terms
+      for (const relatedTerm of allRelated) {
+        if (noteText.includes(relatedTerm)) {
+          score += 15
+        }
+      }
+
+      // Category match
+      if (allRelated.includes(note.category.toLowerCase())) {
+        score += 25
+      }
     }
 
-    for (const [intent, keywords] of Object.entries(intentPatterns)) {
-      if (query.includes(intent)) {
-        const noteText = `${note.title} ${note.tags.join(" ")}`.toLowerCase()
-        for (const keyword of keywords) {
-          if (noteText.includes(keyword)) {
-            score += 15
-          }
-        }
+    // Step 3: Direct tag matching (if any query term matches a tag)
+    for (const term of queryTerms) {
+      if (noteTags.includes(term)) {
+        score += 40
       }
     }
 
