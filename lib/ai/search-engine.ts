@@ -24,6 +24,10 @@ class AISearchEngine {
     const normalizedQuery = query.toLowerCase().trim()
     const queryTerms = this.extractSearchTerms(normalizedQuery)
 
+    console.log("[v0] semanticSearch - query:", query, "normalized:", normalizedQuery)
+    console.log("[v0] queryTerms:", queryTerms)
+    console.log("[v0] total notes:", notes.length)
+
     // Track search history
     this.addToSearchHistory(query)
 
@@ -32,9 +36,12 @@ class AISearchEngine {
     for (const note of notes) {
       const result = this.analyzeNoteRelevance(note, normalizedQuery, queryTerms)
       if (result.relevanceScore > 0) {
+        console.log("[v0] Found match - note:", note.title, "score:", result.relevanceScore, "tags:", note.tags)
         results.push(result)
       }
     }
+
+    console.log("[v0] Total search results:", results.length)
 
     // Sort by relevance score (highest first)
     return results.sort((a, b) => b.relevanceScore - a.relevanceScore)
@@ -177,14 +184,18 @@ class AISearchEngine {
       // Check if the term IS a concept
       if (semanticMappings[term]) {
         matchedConcepts.push(term)
+        console.log("[v0] Term", term, "is a concept")
       }
       // Check if the term is related to any concept
       for (const [concept, relatedTerms] of Object.entries(semanticMappings)) {
         if (relatedTerms.includes(term)) {
           matchedConcepts.push(concept)
+          console.log("[v0] Term", term, "maps to concept", concept)
         }
       }
     }
+
+    console.log("[v0] For note:", note.title, "matchedConcepts:", matchedConcepts, "noteTags:", noteTags)
 
     // Step 2: For each matched concept, check if note relates to it
     for (const concept of matchedConcepts) {
@@ -195,6 +206,7 @@ class AISearchEngine {
       for (const tag of noteTags) {
         if (allRelated.includes(tag)) {
           score += 35
+          console.log("[v0] Tag match:", tag, "in concept", concept, "+35")
         }
       }
 
@@ -202,12 +214,14 @@ class AISearchEngine {
       for (const relatedTerm of allRelated) {
         if (noteText.includes(relatedTerm)) {
           score += 15
+          console.log("[v0] Content match:", relatedTerm, "in", note.title, "+15")
         }
       }
 
       // Category match
       if (allRelated.includes(note.category.toLowerCase())) {
         score += 25
+        console.log("[v0] Category match:", note.category, "+25")
       }
     }
 
@@ -215,9 +229,11 @@ class AISearchEngine {
     for (const term of queryTerms) {
       if (noteTags.includes(term)) {
         score += 40
+        console.log("[v0] Direct tag match:", term, "+40")
       }
     }
 
+    console.log("[v0] Final semantic score for", note.title, ":", score)
     return score
   }
 
