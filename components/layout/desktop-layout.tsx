@@ -657,7 +657,6 @@ export function DesktopLayout({
               onShareNote={onShareNote}
               onShare={onShare}
               isDesktopTagsFilterVisible={isTagsFilterVisible}
-              activeMoodFilter={activeMood}
               onNoteSelect={setSelectedNote}
               favouriteNotes={favouriteNotes}
               onToggleFavourite={handleToggleFavourite}
