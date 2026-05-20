@@ -554,12 +554,30 @@ export function NoteSection({
 
   // Watch searchTerm prop and trigger advanced search
   useEffect(() => {
-    if (searchTerm && searchTerm.trim()) {
-      handleAdvancedSearch(searchTerm);
-    } else {
-      clearSearch();
-    }
-  }, [searchTerm]);
+    const performSearch = async () => {
+      if (searchTerm && searchTerm.trim()) {
+        setIsSearching(true);
+        try {
+          const results = await aiSearchEngine.semanticSearch(searchTerm, notes);
+          setSearchResults(results.map((r) => r.note));
+          setIsInSearchMode(true);
+          setActiveSearchQuery(searchTerm);
+          setIsFocusModeOpen(false);
+        } catch (error) {
+          console.error("Search error:", error);
+          setSearchResults([]);
+          setIsInSearchMode(false);
+          setActiveSearchQuery("");
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        clearSearch();
+      }
+    };
+    
+    performSearch();
+  }, [searchTerm, notes]);
 
   // Handle multi-select actions
   const handleMultiSelectAction = async (
