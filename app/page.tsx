@@ -12,7 +12,7 @@ import { ShareCollectionModal, type ShareCollectionData } from "@/components/col
 import { useMultiSelect } from "@/components/collaborative/multi-select-provider"
 import { DesktopLayout } from "@/components/layout/desktop-layout"
 import type { Note } from "@/lib/data"
-import type { ViewMode } from "@/lib/types"
+import type { ViewMode, Bangle } from "@/lib/types"
 
 function HomeContent() {
   const [expanded, setExpanded] = useState(recentNotes.length > 0) // Set initial expanded state based on notes
@@ -27,6 +27,10 @@ function HomeContent() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [singleNoteToShare, setSingleNoteToShare] = useState<Note | null>(null)
+  
+  // Bangles state
+  const [bangles, setBangles] = useState<Bangle[]>([])
+  const [selectedBangle, setSelectedBangle] = useState<Bangle | null>(null)
 
   const { selectedNotes, clearSelection } = useMultiSelect()
 
@@ -203,6 +207,34 @@ function HomeContent() {
     setSingleNoteToShare(note)
   }
 
+  // Bangle handlers
+  const handleCreateBangle = (bangle: Bangle) => {
+    setBangles((prev) => [bangle, ...prev])
+    setSelectedBangle(bangle)
+  }
+
+  const handleDeleteBangle = (bangleId: string) => {
+    setBangles((prev) => prev.filter((b) => b.id !== bangleId))
+    if (selectedBangle?.id === bangleId) {
+      setSelectedBangle(null)
+    }
+  }
+
+  const handleUpdateBangle = (updatedBangle: Bangle) => {
+    setBangles((prev) => prev.map((b) => (b.id === updatedBangle.id ? updatedBangle : b)))
+    if (selectedBangle?.id === updatedBangle.id) {
+      setSelectedBangle(updatedBangle)
+    }
+  }
+
+  const handleSelectBangle = (bangle: Bangle) => {
+    setSelectedBangle(bangle)
+  }
+
+  const handleCloseBangle = () => {
+    setSelectedBangle(null)
+  }
+
   // Prevent scrolling on the body
   useEffect(() => {
     document.body.style.overflow = "hidden"
@@ -301,6 +333,13 @@ function HomeContent() {
           onNoteSaved={handleNoteSaved}
           onShare={handleShare}
           onShareNote={handleShareSingleNote}
+          bangles={bangles}
+          selectedBangle={selectedBangle}
+          onCreateBangle={handleCreateBangle}
+          onDeleteBangle={handleDeleteBangle}
+          onUpdateBangle={handleUpdateBangle}
+          onSelectBangle={handleSelectBangle}
+          onCloseBangle={handleCloseBangle}
         />
       )}
 
