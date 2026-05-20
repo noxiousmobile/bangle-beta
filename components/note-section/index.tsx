@@ -552,6 +552,15 @@ export function NoteSection({
     setIsSearching(false);
   };
 
+  // Watch searchTerm prop and trigger advanced search
+  useEffect(() => {
+    if (searchTerm && searchTerm.trim()) {
+      handleAdvancedSearch(searchTerm);
+    } else {
+      clearSearch();
+    }
+  }, [searchTerm]);
+
   // Handle multi-select actions
   const handleMultiSelectAction = async (
     action: "delete" | "share" | "tag",
