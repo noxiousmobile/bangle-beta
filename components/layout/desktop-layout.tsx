@@ -12,7 +12,6 @@ import {
   Clock,
   BarChart2,
   Star,
-  Smile,
   Share2,
   Sparkles,
   PanelLeftClose,
@@ -22,7 +21,6 @@ import {
 } from "lucide-react";
 import { NoteSection } from "@/components/note-section";
 import { TagFilters } from "@/components/note-section/tag-filters";
-import { MoodFilters } from "@/components/note-section/mood-filters";
 import { AISearchBar } from "@/components/search/ai-search-bar";
 import { useMultiSelect } from "@/components/collaborative/multi-select-provider";
 import { useTagVisibility } from "@/components/tag-visibility-provider";
@@ -95,8 +93,6 @@ export function DesktopLayout({
     try { return parseInt(localStorage.getItem("recentTagsLimit") || "5", 10) || 5 } catch { return 5 }
   });
   const [isTagsFilterVisible, setIsTagsFilterVisible] = useState(false);
-  const [isMoodsFilterVisible, setIsMoodsFilterVisible] = useState(false);
-  const [activeMood, setActiveMood] = useState<string | null>(null);
   const [favouriteNotes, setFavouriteNotes] = useState<Set<number>>(new Set());
   const [collections, setCollections] = useState<
     Array<{ id: string; name: string; noteIds: number[] }>
@@ -195,14 +191,6 @@ export function DesktopLayout({
     }
     if (viewMode === "collections") {
       onViewChange("grid");
-    }
-  };
-
-  const handleMoodsToggle = () => {
-    const newVisibility = !isMoodsFilterVisible;
-    setIsMoodsFilterVisible(newVisibility);
-    if (!newVisibility) {
-      setActiveMood(null);
     }
   };
 
@@ -443,22 +431,6 @@ export function DesktopLayout({
                     ? "justify-center"
                     : "gap-2 px-3 py-2"
                 } text-sm rounded-lg transition-colors ${
-                  isMoodsFilterVisible
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-                onClick={handleMoodsToggle}
-                title={isMounted && isSidebarCollapsed ? "Moods" : ""}
-              >
-                <Smile className="w-5 h-5" />
-                {isMounted && !isSidebarCollapsed && "Moods"}
-              </button>
-              <button
-                className={`w-full flex items-center ${
-                  isMounted && isSidebarCollapsed
-                    ? "justify-center"
-                    : "gap-2 px-3 py-2"
-                } text-sm rounded-lg transition-colors ${
                   isTagsFilterVisible
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted"
@@ -603,15 +575,6 @@ export function DesktopLayout({
               tagsToShow={tagsToShow}
               setTagsToShow={setTagsToShow}
               setActiveFilter={setActiveFilter}
-            />
-          </div>
-        )}
-
-        {isMoodsFilterVisible && (
-          <div className="bg-card border-b border-border px-6 py-4">
-            <MoodFilters
-              activeMood={activeMood}
-              setActiveMood={setActiveMood}
             />
           </div>
         )}
