@@ -232,12 +232,16 @@ export function DesktopLayout({
           isMounted && isSidebarCollapsed ? "w-16" : "w-48 min-w-48"
         }`}
       >
-        <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="p-3 border-b border-border flex items-center justify-between">
           {isMounted && !isSidebarCollapsed && (
             <div className="flex items-center gap-2 min-w-0">
-              <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
+              <img
+                src="/bangle-logo.svg"
+                alt="BangleAI"
+                className="w-10 h-10 flex-shrink-0"
+              />
               <h2 className="text-lg font-semibold text-foreground truncate">
-                Bangle
+                BangleAI
               </h2>
             </div>
           )}
@@ -333,13 +337,29 @@ export function DesktopLayout({
                 <Brain className="w-5 h-5" />
                 {isMounted && !isSidebarCollapsed && "Brain"}
               </button>
+              <button
+                className={`w-full flex items-center ${
+                  isMounted && isSidebarCollapsed
+                    ? "justify-center"
+                    : "gap-2 px-3 py-2"
+                } text-sm rounded-lg transition-colors ${
+                  viewMode === "collections"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+                onClick={() => handleViewModeChange("collections")}
+                title={isMounted && isSidebarCollapsed ? "Insights" : ""}
+              >
+                <Sparkles className="w-5 h-5" />
+                {isMounted && !isSidebarCollapsed && "Insights"}
+              </button>
             </div>
           </div>
 
           <div className="mb-6">
             {isMounted && !isSidebarCollapsed && (
               <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                Sort
+                Sort by
               </h3>
             )}
             <div
@@ -379,36 +399,6 @@ export function DesktopLayout({
                 <BarChart2 className="w-5 h-5" />
                 {isMounted && !isSidebarCollapsed && "Common"}
               </button>
-              <button
-                className={`w-full flex items-center ${
-                  isMounted && isSidebarCollapsed
-                    ? "justify-center"
-                    : "gap-2 px-3 py-2"
-                } text-sm rounded-lg transition-colors ${
-                  viewMode === "collections"
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-                onClick={() => handleViewModeChange("collections")}
-                title={isMounted && isSidebarCollapsed ? "Insights" : ""}
-              >
-                <Sparkles className="w-5 h-5" />
-                {isMounted && !isSidebarCollapsed && "Insights"}
-              </button>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            {isMounted && !isSidebarCollapsed && (
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                Filter
-              </h3>
-            )}
-            <div
-              className={
-                isMounted && isSidebarCollapsed ? "space-y-4" : "space-y-1"
-              }
-            >
               <button
                 className={`w-full flex items-center ${
                   isMounted && isSidebarCollapsed
