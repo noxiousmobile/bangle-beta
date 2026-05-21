@@ -390,10 +390,10 @@ export function DesktopLayout({
                     : "text-muted-foreground hover:bg-muted"
                 }`}
                 onClick={() => handleViewModeChange("collections")}
-                title={isMounted && isSidebarCollapsed ? "Insight (AI)" : ""}
+                title={isMounted && isSidebarCollapsed ? "Insights" : ""}
               >
-                <Brain className="w-5 h-5" />
-                {isMounted && !isSidebarCollapsed && "Insight (AI)"}
+                <Star className="w-5 h-5" />
+                {isMounted && !isSidebarCollapsed && "Insights"}
               </button>
             </div>
           </div>
