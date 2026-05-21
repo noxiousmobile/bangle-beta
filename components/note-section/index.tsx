@@ -552,6 +552,38 @@ export function NoteSection({
     setIsSearching(false);
   };
 
+  // Watch searchTerm prop and trigger advanced search
+  useEffect(() => {
+    const performSearch = async () => {
+      // Only search if we have a search term AND notes to search through
+      // Skip if notes is empty (prevents overwriting good results with empty results)
+      if (searchTerm && searchTerm.trim() && notes.length > 0) {
+        setIsSearching(true);
+        try {
+          const results = await aiSearchEngine.semanticSearch(searchTerm, notes);
+          const noteResults = results.map((r) => r.note);
+          setSearchResults(noteResults);
+          setIsInSearchMode(true);
+          setActiveSearchQuery(searchTerm);
+          setIsFocusModeOpen(false);
+        } catch (error) {
+          console.error("Search error:", error);
+          setSearchResults([]);
+          setIsInSearchMode(false);
+          setActiveSearchQuery("");
+        } finally {
+          setIsSearching(false);
+        }
+      } else if (!searchTerm || !searchTerm.trim()) {
+        // Only clear search if there's no search term
+        // Don't clear if notes became empty but searchTerm still exists
+        clearSearch();
+      }
+    };
+    
+    performSearch();
+  }, [searchTerm, notes]);
+
   // Handle multi-select actions
   const handleMultiSelectAction = async (
     action: "delete" | "share" | "tag",
