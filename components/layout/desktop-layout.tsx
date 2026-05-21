@@ -232,16 +232,16 @@ export function DesktopLayout({
           isMounted && isSidebarCollapsed ? "w-16" : "w-48 min-w-48"
         }`}
       >
-        <div className="p-4 border-b border-border flex items-center justify-between">
+        <div className="p-3 border-b border-border flex items-center justify-between">
           {isMounted && !isSidebarCollapsed && (
             <div className="flex items-center gap-2 min-w-0">
               <img
                 src="/bangle-logo.svg"
-                alt="Bangle"
+                alt="BangleAI"
                 className="w-10 h-10 flex-shrink-0"
               />
               <h2 className="text-lg font-semibold text-foreground truncate">
-                Bangle
+                BangleAI
               </h2>
             </div>
           )}
