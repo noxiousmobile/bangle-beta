@@ -392,7 +392,7 @@ export function DesktopLayout({
                 onClick={() => handleViewModeChange("collections")}
                 title={isMounted && isSidebarCollapsed ? "Insights" : ""}
               >
-                <Star className="w-5 h-5" />
+                <Sparkles className="w-5 h-5" />
                 {isMounted && !isSidebarCollapsed && "Insights"}
               </button>
             </div>
