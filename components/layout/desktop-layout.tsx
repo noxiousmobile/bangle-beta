@@ -17,7 +17,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Download,
-  Settings,
 } from "lucide-react";
 import { NoteSection } from "@/components/note-section";
 import { TagFilters } from "@/components/note-section/tag-filters";
@@ -82,7 +81,6 @@ export function DesktopLayout({
   const [activeFilter, setActiveFilter] = useState<string[]>([]);
   const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [activeView, setActiveView] = useState<
     "recents" | "common" | "favourites"
@@ -93,6 +91,7 @@ export function DesktopLayout({
     try { return parseInt(localStorage.getItem("recentTagsLimit") || "5", 10) || 5 } catch { return 5 }
   });
   const [isTagsFilterVisible, setIsTagsFilterVisible] = useState(false);
+  const [isGoogleDriveInfoOpen, setIsGoogleDriveInfoOpen] = useState(false);
   const [favouriteNotes, setFavouriteNotes] = useState<Set<number>>(new Set());
   const [collections, setCollections] = useState<
     Array<{ id: string; name: string; noteIds: number[] }>
@@ -434,6 +433,54 @@ export function DesktopLayout({
             </div>
           </div>
 
+          {/* Integrations Section */}
+          <div className="mb-6">
+            {isMounted && !isSidebarCollapsed && (
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                Integrations
+              </h3>
+            )}
+            <div
+              className={
+                isMounted && isSidebarCollapsed ? "space-y-4" : "space-y-1"
+              }
+            >
+              <button
+                className={`w-full flex items-center ${
+                  isMounted && isSidebarCollapsed
+                    ? "justify-center"
+                    : "gap-2 px-3 py-2"
+                } text-sm rounded-lg transition-colors text-muted-foreground hover:bg-muted`}
+                onClick={() => setIsImportOpen(true)}
+                title={isMounted && isSidebarCollapsed ? "Google Keep" : ""}
+              >
+                <Download className="w-5 h-5" />
+                {isMounted && !isSidebarCollapsed && "Google Keep"}
+              </button>
+              <button
+                className={`w-full flex items-center ${
+                  isMounted && isSidebarCollapsed
+                    ? "justify-center"
+                    : "gap-2 px-3 py-2"
+                } text-sm rounded-lg transition-colors text-muted-foreground/50 cursor-not-allowed`}
+                onClick={() => setIsGoogleDriveInfoOpen(true)}
+                title={isMounted && isSidebarCollapsed ? "Google Drive (Soon)" : ""}
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
+                {isMounted && !isSidebarCollapsed && (
+                  <span className="flex items-center gap-1">
+                    Google Drive
+                    <span className="text-xs opacity-60">(Soon)</span>
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
           {/* Bangles Section */}
           {bangles.length > 0 && (
             <div className="mb-6">
@@ -499,60 +546,6 @@ export function DesktopLayout({
                 <Plus className="w-4 h-4" />
                 Add
               </button>
-              <div className="relative">
-                <button
-                  className="flex items-center justify-center w-10 h-10 border border-border bg-card text-foreground rounded-lg hover:bg-muted transition-colors"
-                  onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                  title="Settings"
-                >
-                  <Settings className="w-4 h-4" />
-                </button>
-                {isSettingsOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setIsSettingsOpen(false)}
-                    />
-                    <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg z-50 py-1 min-w-[220px]">
-                      <button
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors whitespace-nowrap"
-                        onClick={() => {
-                          setIsSettingsOpen(false);
-                          setIsImportOpen(true);
-                        }}
-                      >
-                        <Download className="w-4 h-4 flex-shrink-0" />
-                        Import (Google Keep)
-                      </button>
-                      <div className="border-t border-border mx-1 my-1" />
-                      <div className="px-3 py-2">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <span className="text-sm text-foreground">Recent tags to show</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {[3, 5, 8, 10].map((n) => (
-                            <button
-                              key={n}
-                              className={`flex-1 py-1 text-xs rounded border transition-colors ${
-                                recentTagsLimit === n
-                                  ? "bg-primary text-primary-foreground border-primary"
-                                  : "bg-background text-muted-foreground border-border hover:border-primary hover:text-foreground"
-                              }`}
-                              onClick={() => {
-                                setRecentTagsLimit(n);
-                                try { localStorage.setItem("recentTagsLimit", String(n)) } catch {}
-                              }}
-                            >
-                              {n}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
             </div>
           </div>
         </div>
@@ -716,6 +709,63 @@ export function DesktopLayout({
             }}
             onCreate={handleCreateBangleComplete}
           />
+        )}
+
+        {/* Google Drive Coming Soon Modal */}
+        {isGoogleDriveInfoOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-card rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-green-500 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                      <path d="M2 17l10 5 10-5" />
+                      <path d="M2 12l10 5 10-5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground">Google Drive Integration</h2>
+                    <p className="text-sm text-muted-foreground">Coming Soon</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 mb-6">
+                  <p className="text-foreground">
+                    We&apos;re working on bringing Google Drive integration to BangleAI. Here&apos;s what you&apos;ll be able to do:
+                  </p>
+                  
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span><strong className="text-foreground">Import Documents</strong> - Bring your Google Docs, Slides, and other files directly into BangleAI</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span><strong className="text-foreground">Smart Tagging</strong> - AI will automatically suggest tags based on your document content</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span><strong className="text-foreground">Brain Visualization</strong> - See how your Google Drive files connect with your notes</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span><strong className="text-foreground">Sync Changes</strong> - Keep your imported documents up-to-date automatically</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setIsGoogleDriveInfoOpen(false)}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    Got it
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
