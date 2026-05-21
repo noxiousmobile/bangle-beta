@@ -283,21 +283,6 @@ export function BrainView({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-            <svg
-              className="w-4 h-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
           <div>
             <h1 className="text-lg font-semibold text-gray-900">Brain</h1>
             <p className="text-xs text-gray-500">
