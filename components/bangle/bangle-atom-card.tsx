@@ -11,9 +11,10 @@ interface BangleAtomCardProps {
   onViewNote?: (noteId: number) => void
   onUpdateContent?: (noteId: number, newContent: string) => void
   onUpdateTitle?: (noteId: number, newTitle: string) => void
+  sharedTags?: string[]
 }
 
-export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateContent, onUpdateTitle }: BangleAtomCardProps) {
+export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateContent, onUpdateTitle, sharedTags }: BangleAtomCardProps) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [editedContent, setEditedContent] = useState(atom.content)
@@ -176,18 +177,25 @@ export function BangleAtomCard({ atom, isLast = false, onViewNote, onUpdateConte
           {/* Tags */}
           {atom.tags.length > 0 && (
             <div className="px-3 pb-3 flex flex-wrap gap-1.5">
-              {atom.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground"
-                >
+              {atom.tags.map((tag) => {
+                const isShared = sharedTags?.includes(tag)
+                return (
                   <span
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: getTagColor(tag) }}
-                  />
-                  {tag}
-                </span>
-              ))}
+                    key={tag}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full ${
+                      isShared
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: getTagColor(tag) }}
+                    />
+                    {tag}
+                  </span>
+                )
+              })}
             </div>
           )}
         </div>

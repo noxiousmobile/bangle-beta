@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Layers } from "lucide-react"
+import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2 } from "lucide-react"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
 import { getRelatedNotesCount } from "@/lib/bangle-utils"
 import { getTagColor } from "@/components/note-card"
@@ -19,7 +19,7 @@ interface InlineNoteViewProps {
   onToggleFavourite?: (noteId: number) => void
   collectionName?: string | null
   onCollectionClick?: () => void
-  onCreateBangle?: () => void
+  onSeeRelated?: () => void
   allNotes?: Note[]
 }
 
@@ -33,7 +33,7 @@ export function InlineNoteView({
   onToggleFavourite,
   collectionName,
   onCollectionClick,
-  onCreateBangle,
+  onSeeRelated,
   allNotes = [],
 }: InlineNoteViewProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -154,14 +154,14 @@ export function InlineNoteView({
         </div>
 
         <div className="flex items-center gap-1">
-          {onCreateBangle && allNotes.length > 1 && (
+          {onSeeRelated && allNotes.length > 1 && (
             <button
-              onClick={onCreateBangle}
+              onClick={onSeeRelated}
               className="flex items-center gap-2 px-3 py-1.5 text-sm text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
-              title="Create a Bangle from related notes"
+              title="See related notes"
             >
-              <Layers className="w-4 h-4" />
-              <span className="hidden sm:inline">Create Bangle</span>
+              <Link2 className="w-4 h-4" />
+              <span className="hidden sm:inline">See related</span>
               {getRelatedNotesCount(note, allNotes) > 0 && (
                 <span className="text-xs bg-primary/20 px-1.5 py-0.5 rounded-full">
                   {getRelatedNotesCount(note, allNotes)}
