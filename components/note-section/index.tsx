@@ -555,18 +555,17 @@ export function NoteSection({
   // Watch searchTerm prop and trigger advanced search
   useEffect(() => {
     const performSearch = async () => {
-      if (searchTerm && searchTerm.trim()) {
+      // Only search if we have a search term AND notes to search through
+      // Skip if notes is empty (prevents overwriting good results with empty results)
+      if (searchTerm && searchTerm.trim() && notes.length > 0) {
         setIsSearching(true);
         try {
           const results = await aiSearchEngine.semanticSearch(searchTerm, notes);
-          console.log("[v0] useEffect got results:", results.length, "first result:", results[0]);
           const noteResults = results.map((r) => r.note);
-          console.log("[v0] noteResults:", noteResults.length, "first note:", noteResults[0]?.title);
           setSearchResults(noteResults);
           setIsInSearchMode(true);
           setActiveSearchQuery(searchTerm);
           setIsFocusModeOpen(false);
-          console.log("[v0] State set - isInSearchMode: true, searchResults length:", noteResults.length);
         } catch (error) {
           console.error("Search error:", error);
           setSearchResults([]);
@@ -575,7 +574,9 @@ export function NoteSection({
         } finally {
           setIsSearching(false);
         }
-      } else {
+      } else if (!searchTerm || !searchTerm.trim()) {
+        // Only clear search if there's no search term
+        // Don't clear if notes became empty but searchTerm still exists
         clearSearch();
       }
     };
