@@ -163,6 +163,7 @@ export function BrainView({
   const handleNodeHover = useCallback((node: GraphNode | null) => {
     setHoveredNode(node)
     if (containerRef.current) {
+      // Show pointer cursor when hovering over any node (note, tag, or collection)
       containerRef.current.style.cursor = node ? "pointer" : "grab"
     }
   }, [])
@@ -389,11 +390,19 @@ export function BrainView({
           onNodeClick={handleNodeClick}
           onNodeHover={handleNodeHover}
           nodeRelSize={1}
+          nodePointerAreaPaint={(node, color, ctx) => {
+            // Increase click detection area - make it much larger than the visual node
+            ctx.fillStyle = color
+            const size = (node.size || 1) * 2.5 // Increase clickable area by 2.5x
+            ctx.beginPath()
+            ctx.arc(node.x, node.y, size, 0, 2 * Math.PI)
+            ctx.fill()
+          }}
           linkDirectionalParticles={0}
           d3AlphaDecay={0.02}
           d3VelocityDecay={0.3}
           cooldownTime={3000}
-              backgroundColor="#f5f5f7"
+          backgroundColor="#f5f5f7"
           enableNodeDrag={true}
           enableZoomInteraction={true}
           enablePanInteraction={true}
