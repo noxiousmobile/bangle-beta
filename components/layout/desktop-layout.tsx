@@ -462,7 +462,7 @@ export function DesktopLayout({
                   isMounted && isSidebarCollapsed
                     ? "justify-center"
                     : "gap-2 px-3 py-2"
-                } text-sm rounded-lg transition-colors text-muted-foreground/50 cursor-not-allowed`}
+                } text-sm rounded-lg transition-colors text-muted-foreground/50 cursor-help`}
                 onClick={() => setIsGoogleDriveInfoOpen(true)}
                 title={isMounted && isSidebarCollapsed ? "Google Drive (Soon)" : ""}
               >
