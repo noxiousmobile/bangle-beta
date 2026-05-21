@@ -41,6 +41,7 @@ export function InlineNoteView({
   const [editedTitle, setEditedTitle] = useState(note.title)
   const [editedContent, setEditedContent] = useState(note.content || "")
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setEditedTitle(note.title)
@@ -48,6 +49,28 @@ export function InlineNoteView({
     setIsEditingTitle(false)
     setIsEditingContent(false)
   }, [note])
+
+  // Auto-save content when it changes
+  useEffect(() => {
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current)
+    }
+
+    // Only auto-save if content has changed
+    if (editedContent !== note.content) {
+      // Set a new timer to save after 1 second of inactivity
+      autoSaveTimerRef.current = setTimeout(() => {
+        onSave?.(note.id, { content: editedContent })
+      }, 1000)
+    }
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+    }
+  }, [editedContent, note.content, note.id, onSave])
 
   const handleEditTitle = () => {
     setIsEditingTitle(true)
@@ -68,18 +91,6 @@ export function InlineNoteView({
 
   const handleEditContent = () => {
     setIsEditingContent(true)
-  }
-
-  const handleSaveContent = () => {
-    if (editedContent !== note.content) {
-      onSave?.(note.id, { content: editedContent })
-    }
-    setIsEditingContent(false)
-  }
-
-  const handleCancelContent = () => {
-    setEditedContent(note.content || "")
-    setIsEditingContent(false)
   }
 
   const handleDelete = () => {
@@ -261,22 +272,6 @@ export function InlineNoteView({
                     autoFocus={true}
                     showTags={false}
                   />
-                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
-                    <button
-                      onClick={handleSaveContent}
-                      className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm"
-                    >
-                      <Save className="w-4 h-4" />
-                      Save
-                    </button>
-                    <button
-                      onClick={handleCancelContent}
-                      className="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors text-sm"
-                    >
-                      <X className="w-4 h-4" />
-                      Cancel
-                    </button>
-                  </div>
                 </div>
               ) : (
                 <div
