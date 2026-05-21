@@ -30,7 +30,7 @@ import { InlineNoteView } from "@/components/note-preview/inline-note-view";
 import type { Note } from "@/lib/data";
 import type { PanInfo } from "framer-motion";
 import type { ViewMode, Bangle } from "@/lib/types";
-import { BangleViewer, BangleList, CreateBangleModal } from "@/components/bangle";
+import { BangleViewer, BangleList, CreateBangleModal, RelatedNotesPanel } from "@/components/bangle";
 import { BrainView } from "@/components/brain";
 import { Layers } from "lucide-react";
 import type { Collection } from "@/lib/brain-utils";
@@ -99,6 +99,8 @@ export function DesktopLayout({
   const [activeCollection, setActiveCollection] = useState<any | null>(null);
   const [isCreateBangleOpen, setIsCreateBangleOpen] = useState(false);
   const [bangleSourceNote, setBangleSourceNote] = useState<Note | null>(null);
+  const [relatedPanelNote, setRelatedPanelNote] = useState<Note | null>(null);
+  const [relatedPanelPosition, setRelatedPanelPosition] = useState<"right" | "bottom">("right");
 
   // Track mount status to prevent hydration mismatch
   useEffect(() => {
@@ -196,6 +198,14 @@ export function DesktopLayout({
   const handleOpenCreateBangle = (note: Note) => {
     setBangleSourceNote(note);
     setIsCreateBangleOpen(true);
+  };
+
+  const handleSeeRelated = (note: Note) => {
+    setRelatedPanelNote(note);
+  };
+
+  const handleToggleRelatedPanelPosition = () => {
+    setRelatedPanelPosition(prev => prev === "right" ? "bottom" : "right");
   };
 
   const handleCreateBangleComplete = (bangle: Bangle) => {
@@ -613,7 +623,7 @@ export function DesktopLayout({
                 handleViewModeChange("collections");
                 setSelectedNote(null);
               }}
-              onCreateBangle={() => handleOpenCreateBangle(selectedNote)}
+              onSeeRelated={() => handleSeeRelated(selectedNote)}
               allNotes={notes}
             />
           ) : (
@@ -703,6 +713,24 @@ export function DesktopLayout({
               setBangleSourceNote(null);
             }}
             onCreate={handleCreateBangleComplete}
+          />
+        )}
+
+        {/* Related Notes Panel */}
+        {relatedPanelNote && (
+          <RelatedNotesPanel
+            sourceNote={relatedPanelNote}
+            allNotes={notes}
+            onClose={() => setRelatedPanelNote(null)}
+            onViewNote={(noteId) => {
+              const note = notes.find(n => n.id === noteId);
+              if (note) {
+                setSelectedNote(note);
+                setRelatedPanelNote(null);
+              }
+            }}
+            position={relatedPanelPosition}
+            onTogglePosition={handleToggleRelatedPanelPosition}
           />
         )}
 
