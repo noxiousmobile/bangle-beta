@@ -238,7 +238,7 @@ export function DesktopLayout({
               <img
                 src="/bangle-logo.svg"
                 alt="Bangle"
-                className="w-5 h-5 flex-shrink-0"
+                className="w-10 h-10 flex-shrink-0"
               />
               <h2 className="text-lg font-semibold text-foreground truncate">
                 Bangle
