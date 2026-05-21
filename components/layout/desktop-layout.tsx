@@ -471,12 +471,7 @@ export function DesktopLayout({
                   <path d="M2 17l10 5 10-5" />
                   <path d="M2 12l10 5 10-5" />
                 </svg>
-                {isMounted && !isSidebarCollapsed && (
-                  <span className="flex items-center gap-1">
-                    Google Drive
-                    <span className="text-xs opacity-60">(Soon)</span>
-                  </span>
-                )}
+                {isMounted && !isSidebarCollapsed && "Google Drive"}
               </button>
             </div>
           </div>
