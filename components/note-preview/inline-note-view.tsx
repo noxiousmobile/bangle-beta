@@ -44,11 +44,13 @@ export function InlineNoteView({
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    setEditedTitle(note.title)
-    setEditedContent(note.content || "")
-    setIsEditingTitle(false)
-    setIsEditingContent(false)
-  }, [note])
+    // Only reset editing state if we're not currently editing
+    // This prevents the editor from closing during auto-save
+    if (!isEditingTitle && !isEditingContent) {
+      setEditedTitle(note.title)
+      setEditedContent(note.content || "")
+    }
+  }, [note, isEditingTitle, isEditingContent])
 
   // Auto-save content when it changes
   useEffect(() => {
