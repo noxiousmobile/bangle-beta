@@ -1246,7 +1246,7 @@ export function NoteSection({
                       onClick={() => setActiveCollection(null)}
                       className="text-blue-600 hover:text-blue-800 text-xl font-semibold transition-colors"
                     >
-                      AI Collections
+                      Insights
                     </button>
                     <span className="text-gray-400 text-xl">/</span>
                     <span className="text-xl font-semibold text-gray-800">
