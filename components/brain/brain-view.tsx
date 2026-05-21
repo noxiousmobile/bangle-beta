@@ -540,7 +540,7 @@ export function BrainView({
       {/* Note Modal Overlay */}
       {viewingNote && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden mx-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden mx-4">
             <InlineNoteView
               note={viewingNote}
               onClose={() => setViewingNote(null)}
