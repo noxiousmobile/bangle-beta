@@ -235,7 +235,11 @@ export function DesktopLayout({
         <div className="p-4 border-b border-border flex items-center justify-between">
           {isMounted && !isSidebarCollapsed && (
             <div className="flex items-center gap-2 min-w-0">
-              <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
+              <img
+                src="/bangle-logo.svg"
+                alt="Bangle"
+                className="w-5 h-5 flex-shrink-0"
+              />
               <h2 className="text-lg font-semibold text-foreground truncate">
                 Bangle
               </h2>
