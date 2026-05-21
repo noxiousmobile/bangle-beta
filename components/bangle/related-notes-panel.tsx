@@ -70,14 +70,6 @@ export function RelatedNotesPanel({
     : `fixed bottom-0 left-0 right-0 ${isExpanded ? "h-[70vh]" : "h-[50vh]"} bg-background border-t border-border shadow-xl z-40 flex flex-col transition-all duration-300`
 
   return (
-    <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/20 z-30"
-        onClick={onClose}
-      />
-      
-      {/* Panel */}
       <div className={panelClasses}>
         {/* Header */}
         <div className="flex-shrink-0 border-b border-border">
@@ -202,6 +194,5 @@ export function RelatedNotesPanel({
           )}
         </div>
       </div>
-    </>
   )
 }
