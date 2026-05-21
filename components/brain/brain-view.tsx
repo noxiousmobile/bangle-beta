@@ -163,6 +163,7 @@ export function BrainView({
   const handleNodeHover = useCallback((node: GraphNode | null) => {
     setHoveredNode(node)
     if (containerRef.current) {
+      // Show pointer cursor when hovering over any node (note, tag, or collection)
       containerRef.current.style.cursor = node ? "pointer" : "grab"
     }
   }, [])
@@ -282,21 +283,6 @@ export function BrainView({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-            <svg
-              className="w-4 h-4 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
           <div>
             <h1 className="text-lg font-semibold text-gray-900">Brain</h1>
             <p className="text-xs text-gray-500">
@@ -389,11 +375,19 @@ export function BrainView({
           onNodeClick={handleNodeClick}
           onNodeHover={handleNodeHover}
           nodeRelSize={1}
+          nodePointerAreaPaint={(node, color, ctx) => {
+            // Increase click detection area - make it much larger than the visual node
+            ctx.fillStyle = color
+            const size = (node.size || 1) * 2.5 // Increase clickable area by 2.5x
+            ctx.beginPath()
+            ctx.arc(node.x, node.y, size, 0, 2 * Math.PI)
+            ctx.fill()
+          }}
           linkDirectionalParticles={0}
           d3AlphaDecay={0.02}
           d3VelocityDecay={0.3}
           cooldownTime={3000}
-              backgroundColor="#f5f5f7"
+          backgroundColor="#f5f5f7"
           enableNodeDrag={true}
           enableZoomInteraction={true}
           enablePanInteraction={true}
@@ -531,7 +525,7 @@ export function BrainView({
       {/* Note Modal Overlay */}
       {viewingNote && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden mx-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden mx-4">
             <InlineNoteView
               note={viewingNote}
               onClose={() => setViewingNote(null)}
