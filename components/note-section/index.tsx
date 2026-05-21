@@ -559,10 +559,14 @@ export function NoteSection({
         setIsSearching(true);
         try {
           const results = await aiSearchEngine.semanticSearch(searchTerm, notes);
-          setSearchResults(results.map((r) => r.note));
+          console.log("[v0] useEffect got results:", results.length, "first result:", results[0]);
+          const noteResults = results.map((r) => r.note);
+          console.log("[v0] noteResults:", noteResults.length, "first note:", noteResults[0]?.title);
+          setSearchResults(noteResults);
           setIsInSearchMode(true);
           setActiveSearchQuery(searchTerm);
           setIsFocusModeOpen(false);
+          console.log("[v0] State set - isInSearchMode: true, searchResults length:", noteResults.length);
         } catch (error) {
           console.error("Search error:", error);
           setSearchResults([]);
