@@ -66,8 +66,8 @@ export function RelatedNotesPanel({
   }
 
   const panelClasses = position === "right"
-    ? `fixed top-0 right-0 h-full ${isExpanded ? "w-[600px]" : "w-[400px]"} bg-background border-l border-border shadow-xl z-40 flex flex-col transition-all duration-300`
-    : `fixed bottom-0 left-0 right-0 ${isExpanded ? "h-[70vh]" : "h-[50vh]"} bg-background border-t border-border shadow-xl z-40 flex flex-col transition-all duration-300`
+    ? `fixed top-0 right-0 h-full ${isExpanded ? "w-[600px]" : "w-[400px]"} bg-background border-l border-border shadow-xl z-[100] flex flex-col transition-all duration-300`
+    : `fixed bottom-0 left-0 right-0 ${isExpanded ? "h-[70vh]" : "h-[50vh]"} bg-background border-t border-border shadow-xl z-[100] flex flex-col transition-all duration-300`
 
   return (
       <div className={panelClasses}>
