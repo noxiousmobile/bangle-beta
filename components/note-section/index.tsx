@@ -1287,7 +1287,7 @@ export function NoteSection({
                           />
                         </svg>
                         <span>
-                          Menu{" "}
+                          Filter{" "}
                           {activeFilterCount > 0 && `(${activeFilterCount})`}
                         </span>
                         <svg
@@ -1306,197 +1306,58 @@ export function NoteSection({
                       </button>
 
                       {isFilterOpen && (
-                        <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
-                          <div className="p-4">
-                            <div className="mb-4">
-                              <h3 className="text-sm font-medium text-gray-900 mb-3">
-                                View
-                              </h3>
-                              <div className="space-y-1">
-                                <button
-                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                    viewMode === "grid"
-                                      ? "bg-blue-50 text-blue-700"
-                                      : "text-gray-600 hover:bg-gray-50"
-                                  }`}
-                                  onClick={() => {
-                                    if (typeof window !== "undefined") {
-                                      const event = new CustomEvent(
-                                        "viewModeChange",
-                                        { detail: "grid" },
-                                      );
-                                      window.dispatchEvent(event);
-                                    }
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <LayoutGrid className="w-4 h-4" />
-                                  Grid
-                                </button>
-                                <button
-                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                    viewMode === "table"
-                                      ? "bg-blue-50 text-blue-700"
-                                      : "text-gray-600 hover:bg-gray-50"
-                                  }`}
-                                  onClick={() => {
-                                    if (typeof window !== "undefined") {
-                                      const event = new CustomEvent(
-                                        "viewModeChange",
-                                        { detail: "table" },
-                                      );
-                                      window.dispatchEvent(event);
-                                    }
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <Table className="w-4 h-4" />
-                                  Table
-                                </button>
-                                <button
-                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                    viewMode === "split"
-                                      ? "bg-blue-50 text-blue-700"
-                                      : "text-gray-600 hover:bg-gray-50"
-                                  }`}
-                                  onClick={() => {
-                                    if (typeof window !== "undefined") {
-                                      const event = new CustomEvent(
-                                        "viewModeChange",
-                                        { detail: "split" },
-                                      );
-                                      window.dispatchEvent(event);
-                                    }
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <Columns2 className="w-4 h-4" />
-                                  Split
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="border-t border-gray-100 pt-4 mb-4">
-                              <h3 className="text-sm font-medium text-gray-900 mb-3">
-                                Sort
-                              </h3>
-                              <div className="space-y-1">
-                                <button
-                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                    activeView === "recents"
-                                      ? "bg-blue-50 text-blue-700"
-                                      : "text-gray-600 hover:bg-gray-50"
-                                  }`}
-                                  onClick={() => {
-                                    setActiveView("recents");
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12,6 12,12 16,14"></polyline>
-                                  </svg>
-                                  Recent
-                                </button>
-                                <button
-                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                    activeView === "common"
-                                      ? "bg-blue-50 text-blue-700"
-                                      : "text-gray-600 hover:bg-gray-50"
-                                  }`}
-                                  onClick={() => {
-                                    setActiveView("common");
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <line
-                                      x1="18"
-                                      y1="20"
-                                      x2="18"
-                                      y2="10"
-                                    ></line>
-                                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                                  </svg>
-                                  Common
-                                </button>
-                                <button
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-gray-600 hover:bg-gray-50"
-                                  onClick={() => {
-                                    // Trigger AI mode
-                                    if (typeof window !== "undefined") {
-                                      const event = new CustomEvent(
-                                        "viewModeChange",
-                                        { detail: "collections" },
-                                      );
-                                      window.dispatchEvent(event);
-                                    }
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <Brain className="w-4 h-4" />
-                                  Insight (AI)
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="border-t border-gray-100 pt-4 mb-4">
-                              <h3 className="text-sm font-medium text-gray-900 mb-3">
-                                Filter
-                              </h3>
-                              <div className="space-y-1">
-                                <button
-                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                    activeView === "favourites"
-                                      ? "bg-blue-50 text-blue-700"
-                                      : "text-gray-600 hover:bg-gray-50"
-                                  }`}
-                                  onClick={() => {
-                                    setActiveView("favourites");
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <Star className="w-4 h-4" />
-                                  Favourites
-                                </button>
-                                <button
-                                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-gray-600 hover:bg-gray-50"
-                                  onClick={() => {
-                                    setIsFocusModeOpen(true);
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <Smile className="w-4 h-4" />
-                                  Moods
-                                </button>
-                                <button
-                                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                    isMobileTagsFilterVisible
-                                      ? "bg-blue-50 text-blue-700"
-                                      : "text-gray-600 bg-white hover:bg-gray-50"
-                                  }`}
-                                  onClick={() => {
-                                    setIsMobileTagsFilterVisible(
-                                      !isMobileTagsFilterVisible,
-                                    );
-                                    setIsFilterOpen(false);
-                                  }}
-                                >
-                                  <Tag className="w-4 h-4" />
-                                  Tags
-                                </button>
-                              </div>
+                        <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                          <div className="p-3">
+                            <div className="space-y-1">
+                              <button
+                                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                                  activeView === "recents"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "text-gray-600 hover:bg-gray-50"
+                                }`}
+                                onClick={() => {
+                                  setActiveView("recents");
+                                  setIsFilterOpen(false);
+                                }}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <circle cx="12" cy="12" r="10"></circle>
+                                  <polyline points="12,6 12,12 16,14"></polyline>
+                                </svg>
+                                Recent
+                              </button>
+                              <button
+                                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                                  activeView === "common"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "text-gray-600 hover:bg-gray-50"
+                                }`}
+                                onClick={() => {
+                                  setActiveView("common");
+                                  setIsFilterOpen(false);
+                                }}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                                </svg>
+                                Common
+                              </button>
+                              <button
+                                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                                  activeView === "favourites"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "text-gray-600 hover:bg-gray-50"
+                                }`}
+                                onClick={() => {
+                                  setActiveView("favourites");
+                                  setIsFilterOpen(false);
+                                }}
+                              >
+                                <Star className="w-4 h-4" />
+                                Favourites
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -1507,22 +1368,22 @@ export function NoteSection({
                 {expanded &&
                   viewMode !== "collections" &&
                   !activeCollection &&
-                  !isDesktopTagsFilterVisible &&
-                  !isMobileTagsFilterVisible && (
+                  !isDesktopTagsFilterVisible && (
                     <button
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full shadow-sm transition-colors ${
-                        showTagNames
+                        showTagNames || isMobileTagsFilterVisible
                           ? "bg-blue-50 text-blue-600 border border-blue-200"
                           : "text-gray-600 bg-white hover:bg-gray-50"
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleTagNames();
+                        setIsMobileTagsFilterVisible(!isMobileTagsFilterVisible);
                       }}
-                      title={showTagNames ? "Hide tag names" : "Show tag names"}
+                      title="Tags"
                     >
                       <Tag className="w-3.5 h-3.5" />
-                      <span>{showTagNames ? "Hide Tags" : "Show Tags"}</span>
+                      <span>Tags</span>
                     </button>
                   )}
 
@@ -1583,7 +1444,7 @@ export function NoteSection({
             )}
           >
             {isMobileTagsFilterVisible && (
-              <div className="lg:hidden mb-4 p-4 bg-gray-50 rounded-lg">
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                 <TagFilters
                   allTags={allTags}
                   activeFilter={activeFilter}

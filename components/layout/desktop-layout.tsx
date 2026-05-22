@@ -424,22 +424,7 @@ export function DesktopLayout({
                 <Star className="w-5 h-5" />
                 {isMounted && !isSidebarCollapsed && "Favourites"}
               </button>
-              <button
-                className={`w-full flex items-center ${
-                  isMounted && isSidebarCollapsed
-                    ? "justify-center"
-                    : "gap-2 px-3 py-2"
-                } text-sm rounded-lg transition-colors ${
-                  isTagsFilterVisible
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
-                onClick={handleTagsToggle}
-                title={isMounted && isSidebarCollapsed ? "Tags" : ""}
-              >
-                <Tag className="w-5 h-5" />
-                {isMounted && !isSidebarCollapsed && "Tags"}
-              </button>
+
             </div>
           </div>
 

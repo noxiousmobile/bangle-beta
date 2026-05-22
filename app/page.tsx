@@ -11,6 +11,7 @@ import { TagVisibilityProvider } from "@/components/tag-visibility-provider"
 import { ShareCollectionModal, type ShareCollectionData } from "@/components/collaborative/share-collection-modal"
 import { useMultiSelect } from "@/components/collaborative/multi-select-provider"
 import { DesktopLayout } from "@/components/layout/desktop-layout"
+import { BrainView } from "@/components/brain"
 import type { Note } from "@/lib/data"
 import type { ViewMode, Bangle } from "@/lib/types"
 
@@ -258,21 +259,31 @@ function HomeContent() {
       {isMobile ? (
         // Mobile/Tablet Layout (existing)
         <main className="relative h-screen overflow-hidden bg-white">
-          {/* Top section - Recent Notes - Now takes full height */}
+          {/* Top section - Recent Notes or Brain View */}
           <div className="absolute inset-0 w-full h-full">
-            <NoteSection
-              notes={filteredNotes}
-              expanded={expanded}
-              toggleExpanded={toggleExpanded}
-              isAnimating={isAnimating}
-              springY={springY}
-              handleSwipe={handleSwipe}
-              isSearching={isSearching}
-              searchTerm={searchTerm}
-              viewMode={viewMode}
-              onNoteDelete={handleNoteDelete}
-              onShareNote={handleShareSingleNote}
-            />
+            {viewMode === "brain" ? (
+              <BrainView
+                notes={notes}
+                collections={[]}
+                onNoteDelete={handleNoteDelete}
+                onNoteSaved={handleNoteSaved}
+                onClose={() => handleViewChange("grid")}
+              />
+            ) : (
+              <NoteSection
+                notes={filteredNotes}
+                expanded={expanded}
+                toggleExpanded={toggleExpanded}
+                isAnimating={isAnimating}
+                springY={springY}
+                handleSwipe={handleSwipe}
+                isSearching={isSearching}
+                searchTerm={searchTerm}
+                viewMode={viewMode}
+                onNoteDelete={handleNoteDelete}
+                onShareNote={handleShareSingleNote}
+              />
+            )}
           </div>
 
           {/* Indicator dots - only show in default 50/50 state and when no content is being edited */}
@@ -286,7 +297,7 @@ function HomeContent() {
               isEditorFullscreen
                 ? "h-screen top-0" // Full height when editor is active
                 : expanded
-                  ? "h-[80px]" // Back to original height
+                  ? "h-[100px]" // Increased height to account for mobile browser nav
                   : "h-[50vh]"
             }`}
           >
@@ -295,7 +306,7 @@ function HomeContent() {
               <div
                 className="absolute inset-x-0 bottom-0 z-0"
                 style={{
-                  height: "80px",
+                  height: "100px",
                   background: "linear-gradient(to top, rgba(100, 149, 237, 0.15) 0%, rgba(100, 149, 237, 0) 100%)",
                   pointerEvents: "none",
                 }}
