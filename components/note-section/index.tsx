@@ -1455,6 +1455,18 @@ export function NoteSection({
               </div>
             )}
 
+            {isDesktopTagsFilterVisible && (
+              <div className="hidden lg:block mb-4 p-4 bg-muted/40 rounded-lg">
+                <TagFilters
+                  allTags={allTags}
+                  activeFilter={activeFilter}
+                  tagsToShow={tagsToShow}
+                  setTagsToShow={setTagsToShow}
+                  setActiveFilter={setActiveFilter}
+                />
+              </div>
+            )}
+
             {isSearching ? (
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
