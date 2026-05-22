@@ -154,12 +154,12 @@ export function CollapsedState<TView extends string>({
 
   return (
     <motion.div
-      className="relative w-full h-full max-h-[100px] flex flex-col items-center justify-start pt-2 pb-safe"
+      className="relative w-full h-full max-h-[120px] flex flex-col items-center justify-start pt-2 pb-safe"
       style={{
         background:
           "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.25) -10%, hsl(var(--primary) / 0.08) 20%, hsl(var(--primary) / 0.02) 50%, hsl(var(--primary) / 0) 70%)",
         boxShadow: "inset 0 -10px 30px -10px hsl(var(--primary) / 0.15)",
-        paddingBottom: "env(safe-area-inset-bottom, 16px)",
+        paddingBottom: "max(env(safe-area-inset-bottom, 16px), 24px)",
       }}
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}

@@ -297,7 +297,7 @@ function HomeContent() {
               isEditorFullscreen
                 ? "h-screen top-0" // Full height when editor is active
                 : expanded
-                  ? "h-[100px]" // Increased height to account for mobile browser nav
+                  ? "h-[120px]" // Increased height to account for mobile browser nav and safe area
                   : "h-[50vh]"
             }`}
           >
