@@ -530,18 +530,6 @@ export function DesktopLayout({
 
             <div className="flex items-center gap-2">
               <button
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  isTagsFilterVisible
-                    ? "bg-primary/10 text-primary border border-primary/20"
-                    : "text-muted-foreground border border-border hover:bg-muted"
-                }`}
-                onClick={handleTagsToggle}
-                title="Filter by tags"
-              >
-                <Tag className="w-4 h-4" />
-                Tags
-              </button>
-              <button
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                 onClick={() => setIsAddNoteOpen(true)}
               >
