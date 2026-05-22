@@ -1368,8 +1368,7 @@ export function NoteSection({
                 {expanded &&
                   viewMode !== "collections" &&
                   !activeCollection &&
-                  !isDesktopTagsFilterVisible &&
-                  !isMobileTagsFilterVisible && (
+                  !isDesktopTagsFilterVisible && (
                     <button
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full shadow-sm transition-colors ${
                         showTagNames || isMobileTagsFilterVisible
