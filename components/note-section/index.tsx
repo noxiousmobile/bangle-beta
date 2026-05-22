@@ -1254,7 +1254,7 @@ export function NoteSection({
                     </span>
                   </div>
                 ) : (
-                  <h1 className="text-2xl lg:text-xl font-semibold text-gray-800">
+                  <h1 className="text-xl lg:text-xl font-semibold text-gray-800">
                     {getViewTitle()}
                   </h1>
                 )}
