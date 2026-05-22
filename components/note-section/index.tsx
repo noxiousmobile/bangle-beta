@@ -1444,7 +1444,7 @@ export function NoteSection({
             )}
           >
             {isMobileTagsFilterVisible && (
-              <div className="lg:hidden mb-4 p-4 bg-gray-50 rounded-lg">
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
                 <TagFilters
                   allTags={allTags}
                   activeFilter={activeFilter}
