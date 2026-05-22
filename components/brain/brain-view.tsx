@@ -281,18 +281,91 @@ export function BrainView({
   return (
       <div className="flex flex-col h-full bg-[#f5f5f7] relative overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white z-10">
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900">Brain</h1>
-            <p className="text-xs text-gray-500">
-              {stats.noteCount} notes, {stats.tagCount} tags, {stats.totalConnections} connections
-            </p>
+      <div className="border-b border-gray-200 bg-white z-10">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">Brain</h1>
+              <p className="text-xs text-gray-500">
+                {stats.noteCount} notes, {stats.tagCount} tags, {stats.totalConnections} connections
+              </p>
+            </div>
+          </div>
+
+          {/* Search - desktop only (inline) */}
+          <div className="hidden md:flex flex-1 max-w-md mx-4">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search nodes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowStats(!showStats)}
+              className={`hidden md:flex p-2 rounded-lg transition-colors ${
+                showStats
+                  ? "bg-purple-500/20 text-purple-600"
+                  : "text-gray-500 hover:bg-gray-100"
+              }`}
+              title="Toggle stats panel"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+            <div className="hidden md:block w-px h-6 bg-gray-200" />
+            <button
+              onClick={handleZoomOut}
+              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Zoom out"
+            >
+              <ZoomOut className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleZoomIn}
+              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Zoom in"
+            >
+              <ZoomIn className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleFitToScreen}
+              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Fit to screen"
+            >
+              <Maximize2 className="w-5 h-5" />
+            </button>
+            {onClose && (
+              <>
+                <div className="w-px h-6 bg-gray-200" />
+                <button
+                  onClick={onClose}
+                  className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Close"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Search */}
-        <div className="flex-1 max-w-md mx-4">
+        {/* Search - mobile only (full width below header) */}
+        <div className="md:hidden px-4 pb-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -311,55 +384,6 @@ export function BrainView({
               </button>
             )}
           </div>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowStats(!showStats)}
-            className={`p-2 rounded-lg transition-colors ${
-              showStats
-                ? "bg-purple-500/20 text-purple-600"
-                : "text-gray-500 hover:bg-gray-100"
-            }`}
-            title="Toggle stats panel"
-          >
-            <Info className="w-5 h-5" />
-          </button>
-          <div className="w-px h-6 bg-gray-200" />
-          <button
-            onClick={handleZoomOut}
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Zoom out"
-          >
-            <ZoomOut className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleZoomIn}
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Zoom in"
-          >
-            <ZoomIn className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleFitToScreen}
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Fit to screen"
-          >
-            <Maximize2 className="w-5 h-5" />
-          </button>
-          {onClose && (
-            <>
-              <div className="w-px h-6 bg-gray-200" />
-              <button
-                onClick={onClose}
-                className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </>
-          )}
         </div>
       </div>
 
@@ -412,9 +436,9 @@ export function BrainView({
           </div>
         </div>
 
-        {/* Stats Panel */}
+        {/* Stats Panel - desktop only */}
         {showStats && (
-          <div className="absolute top-4 right-4 w-64 bg-white border border-gray-200 rounded-lg p-4 text-gray-900 shadow-sm">
+          <div className="hidden md:block absolute top-4 right-4 w-64 bg-white border border-gray-200 rounded-lg p-4 text-gray-900 shadow-sm">
             <h3 className="font-medium text-sm mb-3">Graph Insights</h3>
             
             <div className="grid grid-cols-2 gap-3 mb-4">
