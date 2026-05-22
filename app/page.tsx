@@ -286,7 +286,7 @@ function HomeContent() {
               isEditorFullscreen
                 ? "h-screen top-0" // Full height when editor is active
                 : expanded
-                  ? "h-[80px]" // Back to original height
+                  ? "h-[100px]" // Increased height to account for mobile browser nav
                   : "h-[50vh]"
             }`}
           >
@@ -295,7 +295,7 @@ function HomeContent() {
               <div
                 className="absolute inset-x-0 bottom-0 z-0"
                 style={{
-                  height: "80px",
+                  height: "100px",
                   background: "linear-gradient(to top, rgba(100, 149, 237, 0.15) 0%, rgba(100, 149, 237, 0) 100%)",
                   pointerEvents: "none",
                 }}

@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence, type Variants } from "framer-motion"
-import { Plus, Search, X, List, LayoutGrid, Table, Folder, Brain, Share2 } from "lucide-react"
+import { Plus, Search, X, List, LayoutGrid, Table, Brain, Share2 } from "lucide-react"
 import { debounce } from "lodash"
 import { useMultiSelect } from "@/components/collaborative/multi-select-provider"
 
@@ -154,11 +154,12 @@ export function CollapsedState<TView extends string>({
 
   return (
     <motion.div
-      className="relative w-full h-full max-h-[80px] flex flex-col items-center justify-center"
+      className="relative w-full h-full max-h-[100px] flex flex-col items-center justify-start pt-2 pb-safe"
       style={{
         background:
           "radial-gradient(ellipse at center bottom, hsl(var(--primary) / 0.25) -10%, hsl(var(--primary) / 0.08) 20%, hsl(var(--primary) / 0.02) 50%, hsl(var(--primary) / 0) 70%)",
         boxShadow: "inset 0 -10px 30px -10px hsl(var(--primary) / 0.15)",
+        paddingBottom: "env(safe-area-inset-bottom, 16px)",
       }}
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
@@ -257,15 +258,15 @@ export function CollapsedState<TView extends string>({
 
                 <button
                   className={`flex items-center justify-center gap-1 px-2 py-1.5 rounded-full transition-colors ${
-                    activeView === "folder" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                    activeView === "brain" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
                   }`}
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleViewChange("folder")
+                    handleViewChange("brain")
                   }}
                 >
-                  <Folder className="w-4 h-4" />
-                  <span className="text-sm font-medium">Folder</span>
+                  <Brain className="w-4 h-4" />
+                  <span className="text-sm font-medium">Brain</span>
                 </button>
 
                 <button
