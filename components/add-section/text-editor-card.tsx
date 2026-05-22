@@ -318,20 +318,20 @@ export function TextEditorCard({
   return (
     <motion.div
       key="text-editor-state"
-      className="flex flex-col h-full"
+      className="flex flex-col h-full md:h-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="flex flex-col h-full">
-        <div className="w-full max-w-5xl mx-auto bg-white rounded-lg shadow-lg flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto py-4 px-6">
+      <div className="flex flex-col h-full md:h-auto">
+        <div className="w-full max-w-5xl mx-auto bg-white rounded-lg shadow-lg flex flex-col h-full md:h-auto">
+          <div className="flex-1 overflow-y-auto py-4 px-6 md:flex-none">
             <RichTextEditor
               initialContent={initialText}
               onChange={handleEditorChange}
               placeholder="Write your note here..."
-              className="w-full"
+              className="w-full min-h-[300px] md:min-h-auto"
               autoFocus={true}
               recentTags={recentTags}
             />
@@ -339,9 +339,11 @@ export function TextEditorCard({
 
           <div 
             className="border-t border-gray-100 bg-white flex-shrink-0 sticky bottom-0"
-            style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+            style={{ 
+              paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)"
+            }}
           >
-            <div className="flex justify-end space-x-3 px-6 py-4">
+            <div className="flex justify-end space-x-3 px-6 py-3">
               <motion.button
                 className="flex items-center space-x-1 px-4 py-2 bg-[#edf0f1] rounded-md text-gray-700"
                 whileHover={{ scale: 1.05 }}
