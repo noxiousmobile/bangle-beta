@@ -12,6 +12,7 @@ import { ShareCollectionModal, type ShareCollectionData } from "@/components/col
 import { useMultiSelect } from "@/components/collaborative/multi-select-provider"
 import { DesktopLayout } from "@/components/layout/desktop-layout"
 import { BrainView } from "@/components/brain"
+import { WelcomeModal } from "@/components/welcome-modal"
 import type { Note } from "@/lib/data"
 import type { ViewMode, Bangle } from "@/lib/types"
 
@@ -364,6 +365,9 @@ function HomeContent() {
         selectedNotes={singleNoteToShare ? [singleNoteToShare] : selectedNotes}
         onShare={handleShareComplete}
       />
+
+      {/* First-time welcome / onboarding modal */}
+      <WelcomeModal />
     </>
   )
 }
