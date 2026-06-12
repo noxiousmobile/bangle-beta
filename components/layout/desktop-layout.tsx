@@ -517,7 +517,7 @@ export function DesktopLayout({
 
         {isMounted && !isSidebarCollapsed && (
           <div className="px-4 py-2 text-xs text-muted-foreground/60">
-            V.0.05
+            V.0.06
           </div>
         )}
       </div>
