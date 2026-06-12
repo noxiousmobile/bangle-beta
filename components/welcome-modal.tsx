@@ -185,10 +185,7 @@ export function WelcomeModal() {
               {/* Beta note */}
               <div className="px-6 py-6 sm:px-10">
                 <div className="rounded-xl border border-amber-200/70 bg-amber-50 p-4">
-                  <h3 className="text-sm font-semibold text-amber-900">
-                    A quick heads-up
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-amber-800/90">
+                  <p className="text-sm leading-relaxed text-amber-800/90">
                     Bangle AI is an early MVP built for previews and early
                     adopters. Some features are still being shaped, so expect
                     rough edges. We'd love for you to explore, share feedback,
