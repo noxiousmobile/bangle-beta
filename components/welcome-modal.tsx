@@ -133,7 +133,6 @@ export function WelcomeModal() {
                 />
                 <div className="relative">
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                    <Sparkles className="h-3.5 w-3.5" />
                     Beta · Early Preview
                   </span>
 
