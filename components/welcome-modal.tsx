@@ -189,7 +189,8 @@ export function WelcomeModal() {
                     Bangle AI is an early MVP built for previews and early
                     adopters. Some features are still being shaped, so expect
                     rough edges. We'd love for you to explore, share feedback,
-                    and help us build something great.
+                    and help us build something great - reach us at{" "}
+                    <span className="font-semibold">contact@bangleai.com</span>
                   </p>
                 </div>
               </div>
