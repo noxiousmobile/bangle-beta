@@ -138,9 +138,11 @@ export function WelcomeModal() {
                   </span>
 
                   <div className="mt-6 flex items-center justify-center gap-2.5">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                      <Sparkles className="h-6 w-6" />
-                    </span>
+                    <img
+                      src="/bangle-logo.svg"
+                      alt="Bangle AI logo"
+                      className="h-11 w-11 flex-shrink-0"
+                    />
                     <h1
                       id="welcome-title"
                       className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
