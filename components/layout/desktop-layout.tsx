@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AccountFooter } from "@/components/auth/account-footer";
 import {
   Plus,
   LayoutGrid,
@@ -516,9 +517,7 @@ export function DesktopLayout({
         </div>
 
         {isMounted && !isSidebarCollapsed && (
-          <div className="px-4 py-2 text-xs text-muted-foreground/60">
-            V.0.06
-          </div>
+  <AccountFooter version="V.0.07" />
         )}
       </div>
 

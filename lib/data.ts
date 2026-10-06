@@ -497,7 +497,9 @@ export const addNote = (noteData: {
   url?: string
   image?: string
 }) => {
-  const nextId = Math.max(0, ...recentNotes.map((n) => n.id)) + 1
+  // Negative temporary id: the real id is assigned by the database on insert,
+  // so it can never collide with an existing persisted note.
+  const nextId = -Date.now()
 
   const base = {
     id: nextId,

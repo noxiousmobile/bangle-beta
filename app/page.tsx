@@ -1,8 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import useSWR from "swr"
 import { useSpring, useMotionValue, type PanInfo } from "framer-motion"
 import { recentNotes } from "@/lib/data"
+import {
+  fetchNotes,
+  insertNote,
+  updateNote,
+  deleteNotes,
+  fetchBangles,
+  insertBangle,
+  updateBangle,
+  deleteBangle,
+} from "@/lib/notes-db"
 import { NoteSection } from "@/components/note-section"
 import { AddSection } from "@/components/add-section"
 import { IndicatorDots } from "@/components/ui/indicator-dots"
@@ -16,13 +27,21 @@ import { WelcomeModal } from "@/components/welcome-modal"
 import type { Note } from "@/lib/data"
 import type { ViewMode, Bangle } from "@/lib/types"
 
+const EMPTY_NOTES: Note[] = []
+const EMPTY_BANGLES: Bangle[] = []
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 function HomeContent() {
-  const [expanded, setExpanded] = useState(recentNotes.length > 0) // Set initial expanded state based on notes
+  const [expanded, setExpanded] = useState(true)
   const [isAnimating, setIsAnimating] = useState(false)
   const [bottomState, setBottomState] = useState<"initial" | "options" | "preview" | "text-editor">("initial")
   const [searchTerm, setSearchTerm] = useState("")
   const [isSearching, setIsSearching] = useState(false)
-  const [notes, setNotes] = useState<any[]>(recentNotes) // Use state for notes
+
+  const { data: notes = EMPTY_NOTES, mutate: mutateNotes } = useSWR("notes", fetchNotes)
+  const setNotes = (updater: (prev: Note[]) => Note[]) =>
+    mutateNotes((prev) => updater(prev ?? EMPTY_NOTES), { revalidate: false })
+
   const [filteredNotes, setFilteredNotes] = useState(notes)
   const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const [isEditorFullscreen, setIsEditorFullscreen] = useState(false)
@@ -31,8 +50,22 @@ function HomeContent() {
   const [singleNoteToShare, setSingleNoteToShare] = useState<Note | null>(null)
   
   // Bangles state
-  const [bangles, setBangles] = useState<Bangle[]>([])
+  const { data: bangles = EMPTY_BANGLES, mutate: mutateBangles } = useSWR("bangles", fetchBangles)
+  const setBangles = (updater: (prev: Bangle[]) => Bangle[]) =>
+    mutateBangles((prev) => updater(prev ?? EMPTY_BANGLES), { revalidate: false })
   const [selectedBangle, setSelectedBangle] = useState<Bangle | null>(null)
+
+  // Some components (note preview, related notes) still read the shared
+  // `recentNotes` array, so keep it mirrored with the user's real notes.
+  useEffect(() => {
+    recentNotes.splice(0, recentNotes.length, ...(notes as typeof recentNotes))
+  }, [notes])
+
+  const reportSyncError = (action: string, error: unknown) => {
+    console.error(`Failed to ${action}:`, error)
+    mutateNotes()
+    mutateBangles()
+  }
 
   const { selectedNotes, clearSelection } = useMultiSelect()
 
@@ -151,7 +184,21 @@ function HomeContent() {
 
   // Handle note saved - add this new function
   const handleNoteSaved = (newNote: Note) => {
-    setNotes((prevNotes) => [newNote, ...prevNotes])
+    const isExisting =
+      typeof newNote.id === "number" && newNote.id > 0 && notes.some((n) => n.id === newNote.id)
+
+    if (isExisting) {
+      setNotes((prev) => prev.map((n) => (n.id === newNote.id ? { ...n, ...newNote } : n)))
+      updateNote(newNote.id, newNote).catch((err) => reportSyncError("update note", err))
+    } else {
+      const tempId = newNote.id
+      setNotes((prev) => [newNote, ...prev])
+      insertNote(newNote)
+        .then((saved) =>
+          setNotes((prev) => prev.map((n) => (n.id === tempId ? { ...saved, image: newNote.image ?? saved.image } : n))),
+        )
+        .catch((err) => reportSyncError("save note", err))
+    }
 
     // Reset bottom state first
     setBottomState("initial")
@@ -167,7 +214,7 @@ function HomeContent() {
   // Handle individual note deletion
   const handleNoteDelete = (noteId: number) => {
     setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId))
-    console.log(`Note ${noteId} deleted`)
+    if (noteId > 0) deleteNotes([noteId]).catch((err) => reportSyncError("delete note", err))
   }
 
   // Handle sharing
@@ -186,7 +233,7 @@ function HomeContent() {
   const handleMultiSelectDelete = () => {
     const selectedIds = selectedNotes.map((n) => n.id)
     setNotes((prevNotes) => prevNotes.filter((note) => !selectedIds.includes(note.id)))
-    console.log("Deleted notes:", selectedIds)
+    deleteNotes(selectedIds.filter((id) => id > 0)).catch((err) => reportSyncError("delete notes", err))
     clearSelection()
   }
 
@@ -211,8 +258,15 @@ function HomeContent() {
 
   // Bangle handlers
   const handleCreateBangle = (bangle: Bangle) => {
+    const tempId = bangle.id
     setBangles((prev) => [bangle, ...prev])
     setSelectedBangle(bangle)
+    insertBangle(bangle)
+      .then((saved) => {
+        setBangles((prev) => prev.map((b) => (b.id === tempId ? saved : b)))
+        setSelectedBangle((current) => (current?.id === tempId ? saved : current))
+      })
+      .catch((err) => reportSyncError("save bangle", err))
   }
 
   const handleDeleteBangle = (bangleId: string) => {
@@ -220,10 +274,14 @@ function HomeContent() {
     if (selectedBangle?.id === bangleId) {
       setSelectedBangle(null)
     }
+    if (UUID_PATTERN.test(bangleId)) deleteBangle(bangleId).catch((err) => reportSyncError("delete bangle", err))
   }
 
   const handleUpdateBangle = (updatedBangle: Bangle) => {
     setBangles((prev) => prev.map((b) => (b.id === updatedBangle.id ? updatedBangle : b)))
+    if (UUID_PATTERN.test(updatedBangle.id)) {
+      updateBangle(updatedBangle).catch((err) => reportSyncError("update bangle", err))
+    }
     if (selectedBangle?.id === updatedBangle.id) {
       setSelectedBangle(updatedBangle)
     }
