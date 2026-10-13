@@ -5,15 +5,15 @@ import { useState, useEffect, useRef } from "react"
 import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2 } from "lucide-react"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
 import { getRelatedNotesCount } from "@/lib/bangle-utils"
-import { getTagColor } from "@/components/note-card"
 import Image from "next/image"
 import { RichTextEditor } from "@/components/rich-text-editor"
+import { TagInput } from "@/components/tag-input"
 
 interface InlineNoteViewProps {
   note: Note
   onClose: () => void
   onDelete?: (noteId: number) => void
-  onSave?: (noteId: number, updatedData: { title?: string; content?: string }) => void
+  onSave?: (noteId: number, updatedData: { title?: string; content?: string; tags?: string[] }) => void
   onShare?: () => void
   isFavourite?: boolean
   onToggleFavourite?: (noteId: number) => void
@@ -42,6 +42,17 @@ export function InlineNoteView({
   const [editedContent, setEditedContent] = useState(note.content || "")
   const titleInputRef = useRef<HTMLInputElement>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const tagSource = allNotes.length > 0 ? allNotes : recentNotes
+  const tagFrequency = new Map<string, number>()
+  for (const n of tagSource) {
+    for (const tag of n.tags ?? []) tagFrequency.set(tag, (tagFrequency.get(tag) ?? 0) + 1)
+  }
+  const availableTags = Array.from(tagFrequency.keys())
+  const recentTags = Array.from(tagFrequency.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([tag]) => tag)
 
   useEffect(() => {
     // Only reset editing state if we're not currently editing
@@ -211,22 +222,15 @@ export function InlineNoteView({
           </div>
 
           {/* Tags */}
-          {note.tags && note.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {note.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-muted"
-                >
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: getTagColor(tag) }}
-                  />
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="mb-6 rounded-md border border-border bg-muted/50 p-3">
+            <TagInput
+              tags={note.tags ?? []}
+              onChange={(tags) => onSave?.(note.id, { tags })}
+              availableTags={availableTags}
+              recentTags={recentTags}
+              placeholder="Search existing tags or add a new one..."
+            />
+          </div>
 
           {/* Note content */}
           {note.type === "url" ? (

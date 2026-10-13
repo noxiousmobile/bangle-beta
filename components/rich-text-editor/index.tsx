@@ -2,10 +2,11 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback, useRef } from "react"
-import { X, Sparkles } from "lucide-react"
+import { Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { EditorToolbar } from "./editor-toolbar"
 import { MarkdownToggle } from "./markdown-toggle"
+import { TagInput } from "@/components/tag-input"
 import "./editor-styles.css"
 
 interface RichTextEditorProps {
@@ -17,6 +18,7 @@ interface RichTextEditorProps {
   initialTags?: string[]
   showTags?: boolean
   recentTags?: string[]
+  availableTags?: string[]
 }
 
 export function RichTextEditor({
@@ -28,13 +30,13 @@ export function RichTextEditor({
   initialTags = [],
   showTags = true,
   recentTags = [],
+  availableTags,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [isMarkdownMode, setIsMarkdownMode] = useState(false)
   const [markdownContent, setMarkdownContent] = useState("")
   const [autoTags, setAutoTags] = useState<string[]>([])
   const [customTags, setCustomTags] = useState<string[]>(initialTags)
-  const [newTagInput, setNewTagInput] = useState("")
   const [isGeneratingTags, setIsGeneratingTags] = useState(false)
   const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>({})
 
@@ -251,17 +253,6 @@ export function RichTextEditor({
     return () => clearTimeout(t)
   }, [markdownContent])
 
-  const addCustomTag = useCallback(() => {
-    if (newTagInput.trim() && !customTags.includes(newTagInput.trim())) {
-      setCustomTags([...customTags, newTagInput.trim()])
-      setNewTagInput("")
-    }
-  }, [newTagInput, customTags])
-
-  const removeCustomTag = useCallback((tag: string) => {
-    setCustomTags(customTags.filter((t) => t !== tag))
-  }, [customTags])
-
   return (
     <div className={cn("rich-text-editor w-full flex flex-col", className)}>
       <EditorToolbar
@@ -310,57 +301,23 @@ export function RichTextEditor({
       <MarkdownToggle isMarkdownMode={isMarkdownMode} toggleMarkdownMode={toggleMarkdownMode} />
 
       {showTags && (
-        <div className="mt-4 p-3 bg-muted/50 rounded-md border">
-          <div className="flex flex-col space-y-3">
-            <div className="flex flex-wrap gap-1 p-2 border border-border rounded-md bg-background min-h-[38px]">
-              {autoTags.map((tag) => (
-                <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                  {tag}
-                </span>
-              ))}
-              {customTags.map((tag) => (
-                <span key={tag} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                  {tag}
-                  <button onClick={() => removeCustomTag(tag)} className="ml-1 inline-flex items-center justify-center w-3 h-3 rounded-full hover:bg-green-200">
-                    <X className="w-2 h-2" />
-                  </button>
-                </span>
-              ))}
-              <input
-                type="text"
-                value={newTagInput}
-                onChange={(e) => setNewTagInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustomTag())}
-                placeholder={autoTags.length === 0 && customTags.length === 0 ? "Type to auto-generate tags or add own..." : ""}
-                className="flex-1 min-w-[100px] outline-none bg-transparent text-sm py-1"
-              />
-            </div>
-
-            {recentTags.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                <span className="text-xs text-muted-foreground">Recently used</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {recentTags
-                    .filter((tag) => !customTags.includes(tag) && !autoTags.includes(tag))
-                    .map((tag) => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => {
-                          if (!customTags.includes(tag)) {
-                            setCustomTags([...customTags, tag])
-                          }
-                        }}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary hover:bg-primary/5 transition-colors"
-                      >
-                        <span>+</span>
-                        {tag}
-                      </button>
-                    ))}
-                </div>
-              </div>
-            )}
-          </div>
+        <div className="mt-4 rounded-md border bg-muted/50 p-3">
+          <TagInput
+            tags={customTags}
+            onChange={setCustomTags}
+            availableTags={availableTags ?? recentTags}
+            recentTags={recentTags}
+            excludeTags={autoTags}
+            placeholder={autoTags.length === 0 ? "Type to auto-generate tags, or search and add your own..." : "Search or add tags..."}
+            leading={autoTags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+              >
+                {tag}
+              </span>
+            ))}
+          />
         </div>
       )}
     </div>
