@@ -91,26 +91,23 @@ export function RichTextEditor({
       const markdown = htmlToMarkdown(html)
       setMarkdownContent(markdown)
       
-      // Fix duplicate character issue: always remove last char when initialContent exists
-      // The keydown handler captures the keystroke which causes duplication
+      // When a new note is started by typing, the first keystroke is already in
+      // initialContent and can land in the editor a second time while it mounts.
+      // Only revert that stray input; never trim content that was loaded as-is.
       setTimeout(() => {
-        if (editorRef.current) {
-          const text = editorRef.current.innerText || ""
-          if (text.length > 1) {
-            // Remove the last character (the duplicate from keydown)
-            const correctedText = text.slice(0, -1)
-            const correctedHtml = convertPlainTextToHtml(correctedText)
-            editorRef.current.innerHTML = correctedHtml
-            setMarkdownContent(htmlToMarkdown(correctedHtml))
-            
-            // Move cursor to the end of the text
-            const selection = window.getSelection()
-            const range = document.createRange()
-            range.selectNodeContents(editorRef.current)
-            range.collapse(false) // false = collapse to end
-            selection?.removeAllRanges()
-            selection?.addRange(range)
-          }
+        const editor = editorRef.current
+        if (!editor) return
+        if (editor.innerHTML !== html) {
+          editor.innerHTML = html
+          setMarkdownContent(markdown)
+        }
+        if (autoFocus) {
+          const selection = window.getSelection()
+          const range = document.createRange()
+          range.selectNodeContents(editor)
+          range.collapse(false)
+          selection?.removeAllRanges()
+          selection?.addRange(range)
         }
       }, 0)
     }
