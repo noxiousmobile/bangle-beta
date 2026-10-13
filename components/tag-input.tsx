@@ -117,12 +117,12 @@ export function TagInput({
 
   if (!isEditing) {
     return (
-      <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
+      <div className={cn("flex flex-wrap items-center gap-2", className)}>
         {leading}
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium text-foreground"
+            className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm text-foreground"
           >
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getTagColor(tag) }} aria-hidden="true" />
             {tag}
@@ -132,8 +132,8 @@ export function TagInput({
           type="button"
           onClick={() => setIsEditing(true)}
           className={cn(
-            "inline-flex h-6 items-center justify-center gap-1 rounded-full border border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary",
-            tags.length === 0 && !leading ? "px-2.5 text-xs" : "w-6",
+            "inline-flex h-7 items-center justify-center gap-1 rounded-full border border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary",
+            tags.length === 0 && !leading ? "px-3 text-sm" : "w-7",
           )}
           aria-label="Add tag"
         >

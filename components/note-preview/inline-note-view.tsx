@@ -222,7 +222,7 @@ export function InlineNoteView({
           </div>
 
           {/* Tags */}
-          <div className="mb-6 rounded-md border border-border bg-muted/50 p-3">
+          <div className="mb-6">
             <TagInput
               tags={note.tags ?? []}
               onChange={(tags) => onSave?.(note.id, { tags })}
