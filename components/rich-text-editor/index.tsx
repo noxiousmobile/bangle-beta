@@ -9,6 +9,50 @@ import { MarkdownToggle } from "./markdown-toggle"
 import { TagInput } from "@/components/tag-input"
 import "./editor-styles.css"
 
+const ALLOWED_PASTE_TAGS = new Set([
+  "P", "BR", "B", "STRONG", "I", "EM", "U", "S", "STRIKE", "A",
+  "UL", "OL", "LI", "H1", "H2", "H3", "BLOCKQUOTE", "CODE", "PRE",
+])
+const BLOCK_PASTE_TAGS = new Set(["DIV", "SECTION", "ARTICLE", "TR", "H4", "H5", "H6"])
+
+function sanitizePastedHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html")
+  doc.querySelectorAll("script, style, meta, link, title, noscript").forEach((el) => el.remove())
+
+  const clean = (node: Node): Node | DocumentFragment | null => {
+    if (node.nodeType === Node.TEXT_NODE) return doc.createTextNode(node.textContent ?? "")
+    if (node.nodeType !== Node.ELEMENT_NODE) return null
+    const el = node as HTMLElement
+    const children = doc.createDocumentFragment()
+    el.childNodes.forEach((child) => {
+      const cleaned = clean(child)
+      if (cleaned) children.appendChild(cleaned)
+    })
+    if (ALLOWED_PASTE_TAGS.has(el.tagName)) {
+      const out = doc.createElement(el.tagName.toLowerCase())
+      if (el.tagName === "A") {
+        const href = el.getAttribute("href") ?? ""
+        if (/^(https?:|mailto:)/i.test(href)) out.setAttribute("href", href)
+      }
+      out.appendChild(children)
+      return out
+    }
+    if (BLOCK_PASTE_TAGS.has(el.tagName)) {
+      const p = doc.createElement("p")
+      p.appendChild(children)
+      return p
+    }
+    return children
+  }
+
+  const container = doc.createElement("div")
+  doc.body.childNodes.forEach((child) => {
+    const cleaned = clean(child)
+    if (cleaned) container.appendChild(cleaned)
+  })
+  return container.innerHTML
+}
+
 interface RichTextEditorProps {
   initialContent?: string
   placeholder?: string
@@ -185,6 +229,33 @@ export function RichTextEditor({
     if (url) execCmd("insertImage", url)
   }, [execCmd])
 
+  const clearFormatting = useCallback(() => {
+    const editor = editorRef.current
+    const selection = window.getSelection()
+    if (!editor || !selection || selection.isCollapsed) return
+    if (!editor.contains(selection.anchorNode)) return
+    editor.focus()
+    const text = selection.toString()
+    // insertText replaces the selection with unstyled text and keeps the browser undo stack intact
+    document.execCommand("insertText", false, text)
+    document.execCommand("formatBlock", false, "p")
+    handleInput()
+    handleSelectionChange()
+  }, [handleInput, handleSelectionChange])
+
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    const html = e.clipboardData.getData("text/html")
+    const text = e.clipboardData.getData("text/plain")
+    if (!html && !text) return
+    e.preventDefault()
+    if (html) {
+      document.execCommand("insertHTML", false, sanitizePastedHtml(html))
+    } else {
+      document.execCommand("insertText", false, text)
+    }
+    handleInput()
+  }, [handleInput])
+
   const undo = useCallback(() => execCmd("undo"), [execCmd])
   const redo = useCallback(() => execCmd("redo"), [execCmd])
 
@@ -262,6 +333,7 @@ export function RichTextEditor({
         onItalic={() => execCmd("italic")}
         onUnderline={() => execCmd("underline")}
         onStrike={() => execCmd("strikeThrough")}
+        onClearFormatting={clearFormatting}
         onHeading1={() => insertHeading(1)}
         onHeading2={() => insertHeading(2)}
         onBulletList={() => execCmd("insertUnorderedList")}
@@ -290,6 +362,7 @@ export function RichTextEditor({
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
+            onPaste={handlePaste}
             onKeyUp={handleSelectionChange}
             onMouseUp={handleSelectionChange}
             className="prose prose-sm max-w-none p-3 outline-none"

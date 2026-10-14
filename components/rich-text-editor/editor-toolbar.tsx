@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Bold, Italic, Underline, Strikethrough, List, ListOrdered, Heading1, Heading2, Code2, Quote, Undo, Redo, LinkIcon, ImageIcon } from "lucide-react"
+import { Bold, Italic, Underline, Strikethrough, List, ListOrdered, Heading1, Heading2, Code2, Quote, Undo, Redo, LinkIcon, ImageIcon, RemoveFormatting } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface EditorToolbarProps {
@@ -11,6 +11,7 @@ interface EditorToolbarProps {
   onItalic: () => void
   onUnderline: () => void
   onStrike: () => void
+  onClearFormatting: () => void
   onHeading1: () => void
   onHeading2: () => void
   onBulletList: () => void
@@ -25,7 +26,7 @@ interface EditorToolbarProps {
 export function EditorToolbar({
   activeFormats,
   isMarkdownMode,
-  onBold, onItalic, onUnderline, onStrike,
+  onBold, onItalic, onUnderline, onStrike, onClearFormatting,
   onHeading1, onHeading2,
   onBulletList, onOrderedList, onBlockquote,
   onLink, onImage, onUndo, onRedo,
@@ -45,6 +46,10 @@ export function EditorToolbar({
       </ToolbarButton>
       <ToolbarButton onClick={onStrike} isActive={activeFormats.strikeThrough} title="Strikethrough">
         <Strikethrough className="w-4 h-4" />
+      </ToolbarButton>
+
+      <ToolbarButton onClick={onClearFormatting} title="Clear formatting">
+        <RemoveFormatting className="w-4 h-4" />
       </ToolbarButton>
 
       <ToolbarDivider />
