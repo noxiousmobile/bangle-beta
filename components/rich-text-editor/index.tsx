@@ -235,10 +235,71 @@ export function RichTextEditor({
     if (!editor || !selection || selection.isCollapsed) return
     if (!editor.contains(selection.anchorNode)) return
     editor.focus()
-    const text = selection.toString()
-    // insertText replaces the selection with unstyled text and keeps the browser undo stack intact
-    document.execCommand("insertText", false, text)
-    document.execCommand("formatBlock", false, "p")
+
+    const range = selection.getRangeAt(0)
+    const topLevelNode = (node: Node): Node => {
+      let current = node
+      while (current.parentNode && current.parentNode !== editor) current = current.parentNode
+      return current
+    }
+    const startBlock = topLevelNode(range.startContainer === editor ? editor.childNodes[range.startOffset] ?? editor.lastChild! : range.startContainer)
+    const endBlock = topLevelNode(range.endContainer === editor ? editor.childNodes[Math.max(range.endOffset - 1, 0)] ?? editor.lastChild! : range.endContainer)
+    if (!startBlock || !endBlock) return
+
+    // Keep the untouched text before/after the selection (with its own formatting) on the same lines
+    const beforeRange = document.createRange()
+    beforeRange.setStartBefore(startBlock)
+    beforeRange.setEnd(range.startContainer, range.startOffset)
+    const afterRange = document.createRange()
+    afterRange.setStart(range.endContainer, range.endOffset)
+    afterRange.setEndAfter(endBlock)
+    const beforeFragment = beforeRange.cloneContents()
+    const afterFragment = afterRange.cloneContents()
+
+    const toInline = (fragment: DocumentFragment) => {
+      const holder = document.createElement("div")
+      holder.appendChild(fragment)
+      const blocks = holder.querySelectorAll("p,div,h1,h2,h3,h4,h5,h6,blockquote,pre,li")
+      blocks.forEach((block) => block.replaceWith(...Array.from(block.childNodes)))
+      holder.querySelectorAll("ul,ol").forEach((list) => list.replaceWith(...Array.from(list.childNodes)))
+      return Array.from(holder.childNodes).filter((node) => node.textContent !== "" || node.nodeName === "IMG")
+    }
+
+    const beforeNodes = toInline(beforeFragment)
+    const afterNodes = toInline(afterFragment)
+    const lines = selection.toString().replace(/\r/g, "").split("\n")
+
+    const paragraphs = lines.map((line) => {
+      const p = document.createElement("p")
+      if (line) p.appendChild(document.createTextNode(line))
+      return p
+    })
+    const first = paragraphs[0]
+    const last = paragraphs[paragraphs.length - 1]
+    first.prepend(...beforeNodes)
+    const selectedEndNode = last.lastChild
+    last.append(...afterNodes)
+    paragraphs.forEach((p) => {
+      if (!p.hasChildNodes()) p.appendChild(document.createElement("br"))
+    })
+
+    const replaceRange = document.createRange()
+    replaceRange.setStartBefore(startBlock)
+    replaceRange.setEndAfter(endBlock)
+    replaceRange.deleteContents()
+    const fragment = document.createDocumentFragment()
+    paragraphs.forEach((p) => fragment.appendChild(p))
+    replaceRange.insertNode(fragment)
+
+    const newSelection = document.createRange()
+    const firstTextNode = beforeNodes.length ? first.childNodes[beforeNodes.length] : first.firstChild
+    if (firstTextNode) newSelection.setStartBefore(firstTextNode)
+    else newSelection.setStart(first, 0)
+    if (selectedEndNode) newSelection.setEndAfter(selectedEndNode)
+    else newSelection.setEnd(last, 0)
+    selection.removeAllRanges()
+    selection.addRange(newSelection)
+
     handleInput()
     handleSelectionChange()
   }, [handleInput, handleSelectionChange])
