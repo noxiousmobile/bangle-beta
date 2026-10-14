@@ -94,6 +94,7 @@ export function AddSection({
       .slice(0, limit)
       .map(([tag]) => tag)
   })()
+  const allTags = Array.from(new Set(notes.flatMap((note) => note.tags ?? [])))
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const hiddenInputRef = useRef<HTMLInputElement>(null)
@@ -526,6 +527,7 @@ export function AddSection({
                 stickyButtons={true}
                 isFullscreen={isFullscreen}
                 recentTags={recentTags}
+                availableTags={allTags}
               />
             </div>
           )}

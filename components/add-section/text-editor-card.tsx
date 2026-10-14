@@ -16,6 +16,7 @@ interface TextEditorCardProps {
   stickyButtons?: boolean
   isFullscreen?: boolean
   recentTags?: string[]
+  availableTags?: string[]
 }
 
 export function TextEditorCard({
@@ -26,6 +27,7 @@ export function TextEditorCard({
   stickyButtons = false,
   isFullscreen = false,
   recentTags = [],
+  availableTags,
 }: TextEditorCardProps) {
   const [text, setText] = useState<string>(initialText)
   const [htmlContent, setHtmlContent] = useState<string>("")
@@ -334,6 +336,7 @@ export function TextEditorCard({
               className="w-full min-h-[300px] md:min-h-auto"
               autoFocus={true}
               recentTags={recentTags}
+              availableTags={availableTags}
             />
           </div>
 
