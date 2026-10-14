@@ -802,20 +802,14 @@ export function NoteSection({
                   )}
 
                   <div className="flex items-start gap-3">
-                    {note.image && note.image !== "/placeholder.svg" ? (
+                    {note.image && !note.image.startsWith("/placeholder.svg") && (
                       <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
                         <Image
-                          src={note.image || "/placeholder.svg"}
+                          src={note.image}
                           alt={note.title}
                           fill
                           className="object-cover"
                         />
-                      </div>
-                    ) : (
-                      <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex items-start justify-start p-1.5">
-                        <div className="text-[8px] leading-tight text-gray-500 line-clamp-5">
-                          {htmlToPlainText(note.content).slice(0, 80) || "No content"}
-                        </div>
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
