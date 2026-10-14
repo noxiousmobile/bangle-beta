@@ -10,7 +10,7 @@ import {
   type MotionValue,
   AnimatePresence,
 } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, htmlToPlainText } from "@/lib/utils";
 import NoteCard, { getTagColor } from "@/components/note-card";
 import { type Note, findRelatedNotes } from "@/lib/data";
 import type { PanInfo } from "framer-motion";
@@ -814,7 +814,7 @@ export function NoteSection({
                     ) : (
                       <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex items-start justify-start p-1.5">
                         <div className="text-[8px] leading-tight text-gray-500 line-clamp-5">
-                          {note.content?.slice(0, 80) || "No content"}
+                          {htmlToPlainText(note.content).slice(0, 80) || "No content"}
                         </div>
                       </div>
                     )}
@@ -823,7 +823,7 @@ export function NoteSection({
                         {note.title}
                       </h3>
                       <p className="text-xs text-gray-500 line-clamp-2">
-                        {note.content?.slice(0, 100) || "No content"}
+                        {htmlToPlainText(note.content).slice(0, 100) || "No content"}
                       </p>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2 flex-wrap">

@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useMultiSelect } from "./collaborative/multi-select-provider";
 import { useTagVisibility } from "./tag-visibility-provider";
 import type { Note as DataNote } from "@/lib/data";
+import { htmlToPlainText } from "@/lib/utils";
 
 // Define category colors with Apple-inspired palette
 export const categoryColors = {
@@ -126,9 +127,10 @@ export default function NoteCard({
     note.type !== "text" || (note.image && note.image !== "/placeholder.svg");
 
   const getContentPreview = () => {
-    if (!note.content) return "No content";
-    const preview = note.content.slice(0, 90);
-    return preview.length < note.content.length ? `${preview}...` : preview;
+    const text = htmlToPlainText(note.content);
+    if (!text) return "No content";
+    const preview = text.slice(0, 90);
+    return preview.length < text.length ? `${preview}...` : preview;
   };
 
   return (
