@@ -2,8 +2,8 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { createLinkElement, linkifyElement, linkifyHtml, normalizeUrl } from "@/lib/linkify"
 import { EditorToolbar } from "./editor-toolbar"
 import { MarkdownToggle } from "./markdown-toggle"
 import { TagInput } from "@/components/tag-input"
@@ -32,7 +32,11 @@ function sanitizePastedHtml(html: string): string {
       const out = doc.createElement(el.tagName.toLowerCase())
       if (el.tagName === "A") {
         const href = el.getAttribute("href") ?? ""
-        if (/^(https?:|mailto:)/i.test(href)) out.setAttribute("href", href)
+        if (/^(https?:|mailto:)/i.test(href)) {
+          out.setAttribute("href", href)
+          out.setAttribute("target", "_blank")
+          out.setAttribute("rel", "noopener noreferrer")
+        }
       }
       out.appendChild(children)
       return out
@@ -84,6 +88,9 @@ export function RichTextEditor({
   const [customTags, setCustomTags] = useState<string[]>(initialTags)
   const [isGeneratingTags, setIsGeneratingTags] = useState(false)
   const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>({})
+  const [isLinkInputOpen, setIsLinkInputOpen] = useState(false)
+  const [linkValue, setLinkValue] = useState("")
+  const savedRangeRef = useRef<Range | null>(null)
 
   const convertPlainTextToHtml = (text: string): string => {
     if (!text) return ""
@@ -114,7 +121,7 @@ export function RichTextEditor({
       .replace(/<b>(.*?)<\/b>/g, "**$1**")
       .replace(/<em>(.*?)<\/em>/g, "*$1*")
       .replace(/<i>(.*?)<\/i>/g, "*$1*")
-      .replace(/<a href="(.*?)">(.*?)<\/a>/g, "[$2]($1)")
+      .replace(/<a [^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g, "[$2]($1)")
       .replace(/<code>(.*?)<\/code>/g, "`$1`")
       .replace(/<pre><code>(.*?)<\/code><\/pre>/g, "```\n$1\n```")
       .replace(/<li>(.*?)<\/li>/g, "- $1\n")
@@ -133,7 +140,7 @@ export function RichTextEditor({
   // Initialize content
   useEffect(() => {
     if (editorRef.current && initialContent) {
-      const html = convertPlainTextToHtml(initialContent)
+      const html = linkifyHtml(convertPlainTextToHtml(initialContent))
       editorRef.current.innerHTML = html
       const markdown = htmlToMarkdown(html)
       setMarkdownContent(markdown)
@@ -226,10 +233,76 @@ export function RichTextEditor({
     handleInput()
   }, [handleInput])
 
-  const insertLink = useCallback(() => {
-    const url = window.prompt("URL")
-    if (url) execCmd("createLink", url)
-  }, [execCmd])
+  const openLinkInput = useCallback(() => {
+    const editor = editorRef.current
+    const selection = window.getSelection()
+    if (editor && selection?.rangeCount && editor.contains(selection.anchorNode)) {
+      savedRangeRef.current = selection.getRangeAt(0).cloneRange()
+      const selected = selection.toString().trim()
+      setLinkValue(/^(https?:\/\/|www\.)/i.test(selected) ? selected : "")
+    } else {
+      savedRangeRef.current = null
+      setLinkValue("")
+    }
+    setIsLinkInputOpen(true)
+  }, [])
+
+  const closeLinkInput = useCallback(() => {
+    setIsLinkInputOpen(false)
+    setLinkValue("")
+    editorRef.current?.focus()
+  }, [])
+
+  const applyLink = useCallback(() => {
+    const editor = editorRef.current
+    const href = normalizeUrl(linkValue)
+    if (!editor || !href) return
+    editor.focus()
+
+    const selection = window.getSelection()
+    let range = savedRangeRef.current
+    if (!range || !editor.contains(range.commonAncestorContainer)) {
+      range = document.createRange()
+      range.selectNodeContents(editor)
+      range.collapse(false)
+    }
+
+    const anchor = createLinkElement(href, range.collapsed ? linkValue.trim() : undefined)
+    if (!range.collapsed) {
+      anchor.textContent = ""
+      const contents = range.extractContents()
+      contents.querySelectorAll("a").forEach((nested) => nested.replaceWith(...Array.from(nested.childNodes)))
+      anchor.appendChild(contents)
+    }
+    range.insertNode(anchor)
+
+    const after = document.createRange()
+    after.setStartAfter(anchor)
+    after.collapse(true)
+    selection?.removeAllRanges()
+    selection?.addRange(after)
+
+    savedRangeRef.current = null
+    setIsLinkInputOpen(false)
+    setLinkValue("")
+    handleInput()
+  }, [linkValue, handleInput])
+
+  const autoLinkify = useCallback(() => {
+    if (editorRef.current && linkifyElement(editorRef.current)) handleInput()
+  }, [handleInput])
+
+  const handleEditorKeyUp = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === " " || e.key === "Enter" || e.key === "Tab") autoLinkify()
+    handleSelectionChange()
+  }, [autoLinkify, handleSelectionChange])
+
+  const handleEditorClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const anchor = (e.target as HTMLElement).closest("a")
+    if (!anchor?.href) return
+    e.preventDefault()
+    window.open(anchor.href, "_blank", "noopener,noreferrer")
+  }, [])
 
   const insertImage = useCallback(() => {
     const url = window.prompt("Image URL")
@@ -358,6 +431,7 @@ export function RichTextEditor({
     } else {
       document.execCommand("insertText", false, text)
     }
+    if (editorRef.current) linkifyElement(editorRef.current)
     handleInput()
   }, [handleInput])
 
@@ -446,11 +520,53 @@ export function RichTextEditor({
         onBulletList={() => execCmd("insertUnorderedList")}
         onOrderedList={() => execCmd("insertOrderedList")}
         onBlockquote={insertBlockquote}
-        onLink={insertLink}
+        onLink={openLinkInput}
         onImage={insertImage}
         onUndo={undo}
         onRedo={redo}
       />
+
+      {isLinkInputOpen && !isMarkdownMode && (
+        <form
+          className="mb-2 flex items-center gap-2 rounded-md border border-border bg-muted/50 p-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            applyLink()
+          }}
+        >
+          <label htmlFor="editor-link-url" className="sr-only">Link URL</label>
+          <input
+            id="editor-link-url"
+            type="text"
+            inputMode="url"
+            autoFocus
+            value={linkValue}
+            onChange={(e) => setLinkValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault()
+                closeLinkInput()
+              }
+            }}
+            placeholder="https://example.com"
+            className="h-8 flex-1 rounded border border-border bg-background px-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          <button
+            type="submit"
+            disabled={!normalizeUrl(linkValue)}
+            className="h-8 rounded bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-50"
+          >
+            Add link
+          </button>
+          <button
+            type="button"
+            onClick={closeLinkInput}
+            className="h-8 rounded px-3 text-sm text-muted-foreground hover:bg-muted"
+          >
+            Cancel
+          </button>
+        </form>
+      )}
 
       {isMarkdownMode ? (
         <textarea
@@ -470,9 +586,10 @@ export function RichTextEditor({
             suppressContentEditableWarning
             onInput={handleInput}
             onPaste={handlePaste}
-            onKeyUp={handleSelectionChange}
+            onKeyUp={handleEditorKeyUp}
             onMouseUp={handleSelectionChange}
-            className="prose prose-sm max-w-none p-3 outline-none"
+            onClick={handleEditorClick}
+            className="note-content prose prose-sm max-w-none p-3 outline-none"
             style={{ fontSize: "14px" }}
             data-placeholder={placeholder}
           />

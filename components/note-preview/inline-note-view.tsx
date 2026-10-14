@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2 } from "lucide-react"
+import { linkifyHtml } from "@/lib/linkify"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
 import { getRelatedNotesCount } from "@/lib/bangle-utils"
 import Image from "next/image"
@@ -282,13 +283,16 @@ export function InlineNoteView({
               ) : (
                 <div
                   className="p-6 cursor-pointer hover:bg-muted/50 transition-colors min-h-[200px]"
-                  onClick={handleEditContent}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest("a")) return
+                    handleEditContent()
+                  }}
                 >
                   {note.content ? (
                     <div
-                      className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap"
+                      className="note-content prose prose-sm max-w-none text-foreground whitespace-pre-wrap"
                       style={{ fontSize: "14px" }}
-                      dangerouslySetInnerHTML={{ __html: note.content }}
+                      dangerouslySetInnerHTML={{ __html: linkifyHtml(note.content) }}
                     />
                   ) : (
                     <p className="text-muted-foreground italic">Click to add content to this note...</p>
