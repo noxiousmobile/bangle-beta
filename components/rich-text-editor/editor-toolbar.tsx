@@ -48,10 +48,10 @@ export function EditorToolbar({
         <Strikethrough className="w-4 h-4" />
       </ToolbarButton>
 
-      <ToolbarButton onClick={onClearFormatting} title="Remove all formatting from the selected text">
+      <ToolbarButton onClick={onClearFormatting} title="No Style">
         <span className="flex items-center gap-1">
           <RemoveFormatting className="w-4 h-4" />
-          <span className="text-xs font-medium">No Formatting</span>
+          <span className="text-xs font-medium">No Style</span>
         </span>
       </ToolbarButton>
 

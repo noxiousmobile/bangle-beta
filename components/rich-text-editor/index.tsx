@@ -427,6 +427,7 @@ export function RichTextEditor({
             onKeyUp={handleSelectionChange}
             onMouseUp={handleSelectionChange}
             className="prose prose-sm max-w-none p-3 outline-none"
+            style={{ fontSize: "12px" }}
             data-placeholder={placeholder}
           />
         </div>
