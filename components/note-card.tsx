@@ -178,7 +178,7 @@ export default function NoteCard({
             {note.title}
           </h3>
           {!hasRealImage && (
-            <p className="text-sm text-gray-500 line-clamp-2 mb-2">
+            <p className="text-[11px] text-gray-500 line-clamp-2 mb-2">
               {getContentPreview()}
             </p>
           )}
