@@ -39,10 +39,6 @@ export function EditorToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-1 p-1 mb-2 border border-gray-200 rounded-md bg-gray-50 shadow-sm">
-      <FontSizeMenu currentFontSize={currentFontSize} onSelect={onFontSize} />
-
-      <ToolbarDivider />
-
       <ToolbarButton onClick={onBold} isActive={activeFormats.bold} title="Bold">
         <Bold className="w-4 h-4" />
       </ToolbarButton>
@@ -71,6 +67,7 @@ export function EditorToolbar({
       <ToolbarButton onClick={onHeading2} title="Heading 2">
         <Heading2 className="w-4 h-4" />
       </ToolbarButton>
+      <FontSizeMenu currentFontSize={currentFontSize} onSelect={onFontSize} />
 
       <ToolbarDivider />
 
@@ -186,7 +183,7 @@ function FontSizeMenu({ currentFontSize, onSelect }: { currentFontSize: number; 
                   setOpen(false)
                 }}
               >
-                {size}px{size === 14 ? " (default)" : ""}
+                {size}px
               </button>
             </li>
           ))}
