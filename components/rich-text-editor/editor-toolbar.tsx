@@ -1,7 +1,8 @@
 "use client"
 
 import type React from "react"
-import { Bold, Italic, Underline, Strikethrough, List, ListOrdered, Heading1, Heading2, Code2, Quote, Undo, Redo, LinkIcon, ImageIcon, RemoveFormatting } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { ChevronDown, Bold, Italic, Underline, Strikethrough, List, ListOrdered, Heading1, Heading2, Code2, Quote, Undo, Redo, LinkIcon, ImageIcon, RemoveFormatting } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface EditorToolbarProps {
@@ -12,6 +13,8 @@ interface EditorToolbarProps {
   onUnderline: () => void
   onStrike: () => void
   onClearFormatting: () => void
+  currentFontSize: number
+  onFontSize: (px: number) => void
   onHeading1: () => void
   onHeading2: () => void
   onBulletList: () => void
@@ -27,6 +30,7 @@ export function EditorToolbar({
   activeFormats,
   isMarkdownMode,
   onBold, onItalic, onUnderline, onStrike, onClearFormatting,
+  currentFontSize, onFontSize,
   onHeading1, onHeading2,
   onBulletList, onOrderedList, onBlockquote,
   onLink, onImage, onUndo, onRedo,
@@ -35,6 +39,10 @@ export function EditorToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-1 p-1 mb-2 border border-gray-200 rounded-md bg-gray-50 shadow-sm">
+      <FontSizeMenu currentFontSize={currentFontSize} onSelect={onFontSize} />
+
+      <ToolbarDivider />
+
       <ToolbarButton onClick={onBold} isActive={activeFormats.bold} title="Bold">
         <Bold className="w-4 h-4" />
       </ToolbarButton>
@@ -123,6 +131,68 @@ function ToolbarButton({ onClick, disabled, isActive, title, children }: Toolbar
     >
       {children}
     </button>
+  )
+}
+
+const FONT_SIZES = [12, 14, 16, 18, 20]
+
+function FontSizeMenu({ currentFontSize, onSelect }: { currentFontSize: number; onSelect: (px: number) => void }) {
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handleOutside = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("mousedown", handleOutside)
+    return () => document.removeEventListener("mousedown", handleOutside)
+  }, [open])
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        title="Text size"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="flex items-center gap-1 h-8 px-2 rounded hover:bg-gray-200 text-gray-700 text-xs font-medium tabular-nums"
+        onMouseDown={(e) => {
+          // Keep the editor selection alive while the menu is used
+          e.preventDefault()
+          setOpen((prev) => !prev)
+        }}
+      >
+        {currentFontSize}px
+        <ChevronDown className="w-3 h-3" />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          aria-label="Text size"
+          className="absolute left-0 top-full z-20 mt-1 min-w-16 rounded-md border border-gray-200 bg-white py-1 shadow-md"
+        >
+          {FONT_SIZES.map((size) => (
+            <li key={size} role="option" aria-selected={size === currentFontSize}>
+              <button
+                type="button"
+                className={cn(
+                  "w-full px-3 py-1 text-left text-xs text-gray-700 hover:bg-gray-100 tabular-nums",
+                  size === currentFontSize && "bg-gray-100 font-semibold",
+                )}
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  onSelect(size)
+                  setOpen(false)
+                }}
+              >
+                {size}px{size === 14 ? " (default)" : ""}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 

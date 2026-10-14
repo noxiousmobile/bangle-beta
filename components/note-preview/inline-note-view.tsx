@@ -287,6 +287,7 @@ export function InlineNoteView({
                   {note.content ? (
                     <div
                       className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap"
+                      style={{ fontSize: "14px" }}
                       dangerouslySetInnerHTML={{ __html: note.content }}
                     />
                   ) : (

@@ -77,6 +77,7 @@ export function RichTextEditor({
   availableTags,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
+  const [currentFontSize, setCurrentFontSize] = useState(14)
   const [isMarkdownMode, setIsMarkdownMode] = useState(false)
   const [markdownContent, setMarkdownContent] = useState("")
   const [autoTags, setAutoTags] = useState<string[]>([])
@@ -193,6 +194,12 @@ export function RichTextEditor({
       insertUnorderedList: document.queryCommandState("insertUnorderedList"),
       insertOrderedList: document.queryCommandState("insertOrderedList"),
     })
+    const editor = editorRef.current
+    const anchor = window.getSelection()?.anchorNode
+    if (editor && anchor && editor.contains(anchor)) {
+      const element = anchor.nodeType === Node.ELEMENT_NODE ? (anchor as Element) : anchor.parentElement
+      if (element) setCurrentFontSize(Math.round(parseFloat(window.getComputedStyle(element).fontSize)))
+    }
   }, [])
 
   useEffect(() => {
@@ -304,6 +311,43 @@ export function RichTextEditor({
     handleSelectionChange()
   }, [handleInput, handleSelectionChange])
 
+  const applyFontSize = useCallback((px: number) => {
+    const editor = editorRef.current
+    const selection = window.getSelection()
+    if (!editor || !selection || selection.isCollapsed) return
+    if (!editor.contains(selection.anchorNode)) return
+    editor.focus()
+
+    // execCommand("fontSize") only supports 1-7, so mark the selection with size 7 and swap in a real px span
+    document.execCommand("styleWithCSS", false, "false")
+    document.execCommand("fontSize", false, "7")
+    const marked = Array.from(editor.querySelectorAll('font[size="7"]'))
+    let firstSpan: HTMLSpanElement | null = null
+    let lastSpan: HTMLSpanElement | null = null
+    marked.forEach((font) => {
+      const span = document.createElement("span")
+      span.style.fontSize = `${px}px`
+      span.append(...Array.from(font.childNodes))
+      span.querySelectorAll<HTMLElement>("[style]").forEach((el) => {
+        el.style.removeProperty("font-size")
+        if (!el.getAttribute("style")) el.removeAttribute("style")
+      })
+      font.replaceWith(span)
+      firstSpan ??= span
+      lastSpan = span
+    })
+
+    if (firstSpan && lastSpan) {
+      const range = document.createRange()
+      range.setStartBefore(firstSpan)
+      range.setEndAfter(lastSpan)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+    setCurrentFontSize(px)
+    handleInput()
+  }, [handleInput])
+
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
     const html = e.clipboardData.getData("text/html")
     const text = e.clipboardData.getData("text/plain")
@@ -395,6 +439,8 @@ export function RichTextEditor({
         onUnderline={() => execCmd("underline")}
         onStrike={() => execCmd("strikeThrough")}
         onClearFormatting={clearFormatting}
+        currentFontSize={currentFontSize}
+        onFontSize={applyFontSize}
         onHeading1={() => insertHeading(1)}
         onHeading2={() => insertHeading(2)}
         onBulletList={() => execCmd("insertUnorderedList")}
@@ -427,7 +473,7 @@ export function RichTextEditor({
             onKeyUp={handleSelectionChange}
             onMouseUp={handleSelectionChange}
             className="prose prose-sm max-w-none p-3 outline-none"
-            style={{ fontSize: "12px" }}
+            style={{ fontSize: "14px" }}
             data-placeholder={placeholder}
           />
         </div>
