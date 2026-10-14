@@ -174,7 +174,7 @@ export default function NoteCard({
         )}
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-base mb-1 text-gray-800 truncate">
+          <h3 className="font-medium text-sm mb-1 text-gray-800 truncate">
             {note.title}
           </h3>
           {!hasRealImage && (
