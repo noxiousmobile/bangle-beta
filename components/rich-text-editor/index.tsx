@@ -397,9 +397,34 @@ export function RichTextEditor({
   const applyFontSize = useCallback((px: number) => {
     const editor = editorRef.current
     const selection = window.getSelection()
-    if (!editor || !selection || selection.isCollapsed) return
-    if (!editor.contains(selection.anchorNode)) return
+    if (!editor || !selection) return
     editor.focus()
+
+    if (!selection.rangeCount || !editor.contains(selection.anchorNode)) {
+      const endRange = document.createRange()
+      endRange.selectNodeContents(editor)
+      endRange.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(endRange)
+    }
+
+    if (selection.isCollapsed) {
+      // No text selected: insert an empty sized span at the caret so the next typed characters use this size.
+      // The zero-width space gives the caret a text node inside the span to land in.
+      const range = selection.getRangeAt(0)
+      const span = document.createElement("span")
+      span.style.fontSize = `${px}px`
+      const placeholder = document.createTextNode("\u200B")
+      span.appendChild(placeholder)
+      range.insertNode(span)
+      const caret = document.createRange()
+      caret.setStart(placeholder, 1)
+      caret.collapse(true)
+      selection.removeAllRanges()
+      selection.addRange(caret)
+      setCurrentFontSize(px)
+      return
+    }
 
     // execCommand("fontSize") only supports 1-7, so mark the selection with size 7 and swap in a real px span
     document.execCommand("styleWithCSS", false, "false")
