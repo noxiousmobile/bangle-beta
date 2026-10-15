@@ -4,6 +4,8 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2 } from "lucide-react"
 import { linkifyHtml } from "@/lib/linkify"
+import { anchorifyHtml, extractAnchors } from "@/lib/anchors"
+import { NoteAnchors } from "@/components/note-anchors"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
 import { getRelatedNotesCount } from "@/lib/bangle-utils"
 import Image from "next/image"
@@ -43,6 +45,8 @@ export function InlineNoteView({
   const [editedContent, setEditedContent] = useState(note.content || "")
   const titleInputRef = useRef<HTMLInputElement>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const anchors = extractAnchors(isEditingContent ? editedContent : note.content || "")
 
   const tagSource = allNotes.length > 0 ? allNotes : recentNotes
   const tagFrequency = new Map<string, number>()
@@ -218,7 +222,7 @@ export function InlineNoteView({
       <div className="flex-1 overflow-auto">
         <div className="px-6 py-6">
           {/* Tags */}
-          <div className="mb-6">
+          <div className="mb-6 flex flex-col gap-3">
             <TagInput
               tags={note.tags ?? []}
               onChange={(tags) => onSave?.(note.id, { tags })}
@@ -226,6 +230,7 @@ export function InlineNoteView({
               recentTags={recentTags}
               placeholder="Search existing tags or add a new one..."
             />
+            <NoteAnchors anchors={anchors} containerRef={contentRef} />
           </div>
 
           {/* Note content */}
@@ -264,7 +269,7 @@ export function InlineNoteView({
               )}
             </div>
           ) : (
-            <div className="bg-card rounded-xl border border-border">
+            <div ref={contentRef} className="bg-card rounded-xl border border-border">
               {isEditingContent ? (
                 <div className="p-6">
                   <RichTextEditor
@@ -288,7 +293,7 @@ export function InlineNoteView({
                     <div
                       className="note-content prose prose-sm max-w-none text-foreground whitespace-pre-wrap"
                       style={{ fontSize: "14px" }}
-                      dangerouslySetInnerHTML={{ __html: linkifyHtml(note.content) }}
+                      dangerouslySetInnerHTML={{ __html: anchorifyHtml(linkifyHtml(note.content)) }}
                     />
                   ) : (
                     <p className="text-muted-foreground italic">Click to add content to this note...</p>

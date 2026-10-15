@@ -4,6 +4,7 @@ import type React from "react"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { createLinkElement, linkifyElement, linkifyHtml, normalizeUrl } from "@/lib/linkify"
+import { anchorifyElement, anchorifyHtml } from "@/lib/anchors"
 import { EditorToolbar } from "./editor-toolbar"
 import { MarkdownToggle } from "./markdown-toggle"
 import { TagInput } from "@/components/tag-input"
@@ -116,6 +117,7 @@ export function RichTextEditor({
 
   const htmlToMarkdown = (html: string): string => {
     return html
+      .replace(/<span[^>]*data-anchor="([^"]+)"[^>]*>[^<]*<\/span>/g, "#$1 ")
       .replace(/<h1>(.*?)<\/h1>/g, "# $1\n\n")
       .replace(/<h2>(.*?)<\/h2>/g, "## $1\n\n")
       .replace(/<h3>(.*?)<\/h3>/g, "### $1\n\n")
@@ -142,7 +144,7 @@ export function RichTextEditor({
   // Initialize content
   useEffect(() => {
     if (editorRef.current && initialContent) {
-      const html = linkifyHtml(convertPlainTextToHtml(initialContent))
+      const html = anchorifyHtml(linkifyHtml(convertPlainTextToHtml(initialContent)))
       editorRef.current.innerHTML = html
       const markdown = htmlToMarkdown(html)
       setMarkdownContent(markdown)
@@ -301,7 +303,11 @@ export function RichTextEditor({
   }, [linkValue, handleInput])
 
   const autoLinkify = useCallback(() => {
-    if (editorRef.current && linkifyElement(editorRef.current)) handleInput()
+    const editor = editorRef.current
+    if (!editor) return
+    const linked = linkifyElement(editor)
+    const anchored = anchorifyElement(editor)
+    if (linked || anchored) handleInput()
   }, [handleInput])
 
   const handleEditorKeyUp = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -468,7 +474,10 @@ export function RichTextEditor({
     } else {
       document.execCommand("insertText", false, text)
     }
-    if (editorRef.current) linkifyElement(editorRef.current)
+    if (editorRef.current) {
+      linkifyElement(editorRef.current)
+      anchorifyElement(editorRef.current)
+    }
     handleInput()
   }, [handleInput])
 
