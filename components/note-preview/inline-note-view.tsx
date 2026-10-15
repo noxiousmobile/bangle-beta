@@ -168,6 +168,14 @@ export function InlineNoteView({
         </div>
 
         <div className="flex items-center gap-1">
+          {collectionName && (
+            <button
+              onClick={onCollectionClick}
+              className="capitalize px-3 py-1.5 text-sm bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors font-medium mr-1"
+            >
+              {collectionName}
+            </button>
+          )}
           {onSeeRelated && allNotes.length > 1 && (
             <button
               onClick={onSeeRelated}
@@ -175,7 +183,7 @@ export function InlineNoteView({
               title="See related notes"
             >
               <Link2 className="w-4 h-4" />
-              <span className="hidden sm:inline">See related</span>
+              <span className="hidden sm:inline">Related</span>
               {getRelatedNotesCount(note, allNotes) > 0 && (
                 <span className="text-xs bg-primary/20 px-1.5 py-0.5 rounded-full">
                   {getRelatedNotesCount(note, allNotes)}
@@ -209,19 +217,6 @@ export function InlineNoteView({
       {/* Content */}
       <div className="flex-1 overflow-auto">
         <div className="px-6 py-6">
-          {/* Meta info */}
-          <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-muted-foreground">
-            <span>{formatDate(note.date)}</span>
-            {collectionName && (
-              <button
-                onClick={onCollectionClick}
-                className="capitalize px-3 py-1 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium"
-              >
-                {collectionName}
-              </button>
-            )}
-          </div>
-
           {/* Tags */}
           <div className="mb-6">
             <TagInput
@@ -301,6 +296,8 @@ export function InlineNoteView({
               )}
             </div>
           )}
+
+          <p className="mt-3 text-sm text-muted-foreground">{formatDate(note.date)}</p>
         </div>
       </div>
     </div>
