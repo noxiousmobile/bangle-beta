@@ -67,6 +67,7 @@ interface RichTextEditorProps {
   showTags?: boolean
   recentTags?: string[]
   availableTags?: string[]
+  footerStart?: React.ReactNode
 }
 
 export function RichTextEditor({
@@ -79,6 +80,7 @@ export function RichTextEditor({
   showTags = true,
   recentTags = [],
   availableTags,
+  footerStart,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [currentFontSize, setCurrentFontSize] = useState(14)
@@ -631,7 +633,11 @@ export function RichTextEditor({
         </div>
       )}
 
-      <MarkdownToggle isMarkdownMode={isMarkdownMode} toggleMarkdownMode={toggleMarkdownMode} />
+      <MarkdownToggle
+          isMarkdownMode={isMarkdownMode}
+          toggleMarkdownMode={toggleMarkdownMode}
+          leading={footerStart}
+        />
 
       {showTags && (
         <div className="mt-4 rounded-md border bg-muted/50 p-3">

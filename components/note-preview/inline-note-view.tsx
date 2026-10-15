@@ -273,6 +273,7 @@ export function InlineNoteView({
                     onChange={(html) => setEditedContent(html)}
                     autoFocus={true}
                     showTags={false}
+                    footerStart={<span className="text-xs text-muted-foreground">{formatDate(note.date)}</span>}
                   />
                 </div>
               ) : (
@@ -297,7 +298,7 @@ export function InlineNoteView({
             </div>
           )}
 
-          <p className="mt-3 text-sm text-muted-foreground">{formatDate(note.date)}</p>
+          {!isEditingContent && <p className="mt-3 text-sm text-muted-foreground">{formatDate(note.date)}</p>}
         </div>
       </div>
     </div>

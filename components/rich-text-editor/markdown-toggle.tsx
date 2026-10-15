@@ -5,11 +5,13 @@ import { FileCode } from "lucide-react"
 interface MarkdownToggleProps {
   isMarkdownMode: boolean
   toggleMarkdownMode: () => void
+  leading?: React.ReactNode
 }
 
-export function MarkdownToggle({ isMarkdownMode, toggleMarkdownMode }: MarkdownToggleProps) {
+export function MarkdownToggle({ isMarkdownMode, toggleMarkdownMode, leading }: MarkdownToggleProps) {
   return (
-    <div className="flex justify-end mt-2">
+    <div className={`flex items-center mt-2 ${leading ? "justify-between" : "justify-end"}`}>
+      {leading}
       <button
         type="button"
         onClick={toggleMarkdownMode}
