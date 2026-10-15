@@ -202,11 +202,21 @@ export function RichTextEditor({
       insertOrderedList: document.queryCommandState("insertOrderedList"),
     })
     const editor = editorRef.current
-    const anchor = window.getSelection()?.anchorNode
-    if (editor && anchor && editor.contains(anchor)) {
-      const element = anchor.nodeType === Node.ELEMENT_NODE ? (anchor as Element) : anchor.parentElement
-      if (element) setCurrentFontSize(Math.round(parseFloat(window.getComputedStyle(element).fontSize)))
+    const selection = window.getSelection()
+    if (!editor || !selection || selection.rangeCount === 0) return
+    const range = selection.getRangeAt(0)
+    if (!editor.contains(range.commonAncestorContainer)) return
+
+    // Range boundaries often sit on the parent block (e.g. after wrapping in a span), so measure the first selected text node instead
+    let target: Node | null = range.startContainer
+    if (!range.collapsed && target.nodeType !== Node.TEXT_NODE) {
+      const walker = document.createTreeWalker(range.commonAncestorContainer, NodeFilter.SHOW_TEXT)
+      let node = walker.nextNode()
+      while (node && !(range.intersectsNode(node) && node.textContent?.trim())) node = walker.nextNode()
+      if (node) target = node
     }
+    const element = target.nodeType === Node.ELEMENT_NODE ? (target as Element) : target.parentElement
+    if (element) setCurrentFontSize(Math.round(parseFloat(window.getComputedStyle(element).fontSize)))
   }, [])
 
   useEffect(() => {
