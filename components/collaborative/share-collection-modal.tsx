@@ -175,15 +175,17 @@ export function ShareCollectionModal({ isOpen, onClose, selectedNotes, onShare }
                   {selectedNotes.map((note) => (
                     <div key={note.id} className="bg-white rounded-lg p-3 border border-gray-200">
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                          <Image
-                            src={note.image || "/placeholder.svg"}
-                            alt={note.title}
-                            width={48}
-                            height={48}
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
+                        {note.image && !note.image.startsWith("/placeholder.svg") && (
+                          <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            <Image
+                              src={note.image}
+                              alt={note.title}
+                              width={48}
+                              height={48}
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
                           <h5 className="font-medium text-gray-900 truncate">{note.title}</h5>
                           <div className="flex items-center gap-2 mt-1">

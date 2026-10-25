@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useMultiSelect } from "./collaborative/multi-select-provider";
 import { useTagVisibility } from "./tag-visibility-provider";
 import type { Note as DataNote } from "@/lib/data";
+import { htmlToPlainText } from "@/lib/utils";
 
 // Define category colors with Apple-inspired palette
 export const categoryColors = {
@@ -122,13 +123,15 @@ export default function NoteCard({
 
   const isTextNote =
     note.type === "text" && (note.image === "/placeholder.svg" || !note.image);
-  const hasRealImage =
-    note.type !== "text" || (note.image && note.image !== "/placeholder.svg");
+  const hasRealImage = Boolean(
+    note.image && !note.image.startsWith("/placeholder.svg"),
+  );
 
   const getContentPreview = () => {
-    if (!note.content) return "No content";
-    const preview = note.content.slice(0, 90);
-    return preview.length < note.content.length ? `${preview}...` : preview;
+    const text = htmlToPlainText(note.content);
+    if (!text) return "No content";
+    const preview = text.slice(0, 90);
+    return preview.length < text.length ? `${preview}...` : preview;
   };
 
   return (
@@ -159,27 +162,26 @@ export default function NoteCard({
       {/* Related notes indicator - always visible (not dependent on hover) */}
 
       <div className="flex p-3 items-start space-x-3">
-        {hasRealImage ? (
+        {hasRealImage && (
           <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
             <Image
-              src={note.image || "/placeholder.svg"}
+              src={note.image as string}
               alt={note.title}
               fill
               className="object-cover"
             />
           </div>
-        ) : (
-          <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex flex-col items-start justify-start p-1.5">
-            <div className="text-[9px] leading-tight text-gray-500 line-clamp-6 overflow-hidden whitespace-pre-wrap">
-              {getContentPreview()}
-            </div>
-          </div>
         )}
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-base mb-1 text-gray-800 truncate">
+          <h3 className="font-medium text-sm mb-1 text-gray-800 truncate">
             {note.title}
           </h3>
+          {!hasRealImage && (
+            <p className="text-[11px] text-gray-500 line-clamp-2 mb-2">
+              {getContentPreview()}
+            </p>
+          )}
           <div className="flex flex-wrap gap-2 mb-2">
             {isMounted && shouldShowTagNames ? (
               <>

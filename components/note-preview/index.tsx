@@ -4,6 +4,8 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import { Share2, Heart, Calendar, Link2, Eye, ExternalLink, Trash2, Save, X, Loader2, Plus } from "lucide-react"
+import { linkifyHtml } from "@/lib/linkify"
+import { anchorifyHtml } from "@/lib/anchors"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
 import { getTagColor } from "@/components/note-card"
 import { aiOrganizationEngine } from "@/lib/ai/organization-engine"
@@ -448,12 +450,15 @@ export function NotePreview({
                     ) : (
                       <div
                         className="bg-white rounded-xl border border-gray-200 p-4 md:p-8 cursor-pointer hover:bg-gray-50 transition-colors"
-                        onClick={handleEditContent}
+                        onClick={(e) => {
+                          if ((e.target as HTMLElement).closest("a")) return
+                          handleEditContent()
+                        }}
                       >
                         <div
-                          className="prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap"
+                          className="note-content prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap"
                           dangerouslySetInnerHTML={{
-                            __html: note.content || "Click to add content to this note...",
+                            __html: note.content ? anchorifyHtml(linkifyHtml(note.content)) : "Click to add content to this note...",
                           }}
                         />
                       </div>

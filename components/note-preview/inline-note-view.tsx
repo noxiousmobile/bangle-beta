@@ -3,6 +3,9 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2 } from "lucide-react"
+import { linkifyHtml } from "@/lib/linkify"
+import { anchorifyHtml, extractAnchors } from "@/lib/anchors"
+import { NoteAnchors } from "@/components/note-anchors"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
 import { getRelatedNotesCount } from "@/lib/bangle-utils"
 import Image from "next/image"
@@ -42,6 +45,8 @@ export function InlineNoteView({
   const [editedContent, setEditedContent] = useState(note.content || "")
   const titleInputRef = useRef<HTMLInputElement>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const anchors = extractAnchors(isEditingContent ? editedContent : note.content || "")
 
   const tagSource = allNotes.length > 0 ? allNotes : recentNotes
   const tagFrequency = new Map<string, number>()
@@ -167,6 +172,14 @@ export function InlineNoteView({
         </div>
 
         <div className="flex items-center gap-1">
+          {collectionName && (
+            <button
+              onClick={onCollectionClick}
+              className="capitalize px-3 py-1.5 text-sm bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors font-medium mr-1"
+            >
+              {collectionName}
+            </button>
+          )}
           {onSeeRelated && allNotes.length > 1 && (
             <button
               onClick={onSeeRelated}
@@ -174,7 +187,7 @@ export function InlineNoteView({
               title="See related notes"
             >
               <Link2 className="w-4 h-4" />
-              <span className="hidden sm:inline">See related</span>
+              <span className="hidden sm:inline">Related</span>
               {getRelatedNotesCount(note, allNotes) > 0 && (
                 <span className="text-xs bg-primary/20 px-1.5 py-0.5 rounded-full">
                   {getRelatedNotesCount(note, allNotes)}
@@ -208,21 +221,8 @@ export function InlineNoteView({
       {/* Content */}
       <div className="flex-1 overflow-auto">
         <div className="px-6 py-6">
-          {/* Meta info */}
-          <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-muted-foreground">
-            <span>{formatDate(note.date)}</span>
-            {collectionName && (
-              <button
-                onClick={onCollectionClick}
-                className="capitalize px-3 py-1 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-medium"
-              >
-                {collectionName}
-              </button>
-            )}
-          </div>
-
           {/* Tags */}
-          <div className="mb-6">
+          <div className="mb-6 flex flex-col gap-3">
             <TagInput
               tags={note.tags ?? []}
               onChange={(tags) => onSave?.(note.id, { tags })}
@@ -230,6 +230,7 @@ export function InlineNoteView({
               recentTags={recentTags}
               placeholder="Search existing tags or add a new one..."
             />
+            <NoteAnchors anchors={anchors} containerRef={contentRef} />
           </div>
 
           {/* Note content */}
@@ -268,7 +269,7 @@ export function InlineNoteView({
               )}
             </div>
           ) : (
-            <div className="bg-card rounded-xl border border-border">
+            <div ref={contentRef} className="bg-card rounded-xl border border-border">
               {isEditingContent ? (
                 <div className="p-6">
                   <RichTextEditor
@@ -277,17 +278,22 @@ export function InlineNoteView({
                     onChange={(html) => setEditedContent(html)}
                     autoFocus={true}
                     showTags={false}
+                    footerStart={<span className="text-xs text-muted-foreground">{formatDate(note.date)}</span>}
                   />
                 </div>
               ) : (
                 <div
                   className="p-6 cursor-pointer hover:bg-muted/50 transition-colors min-h-[200px]"
-                  onClick={handleEditContent}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest("a")) return
+                    handleEditContent()
+                  }}
                 >
                   {note.content ? (
                     <div
-                      className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{ __html: note.content }}
+                      className="note-content prose prose-sm max-w-none text-foreground whitespace-pre-wrap"
+                      style={{ fontSize: "14px" }}
+                      dangerouslySetInnerHTML={{ __html: anchorifyHtml(linkifyHtml(note.content)) }}
                     />
                   ) : (
                     <p className="text-muted-foreground italic">Click to add content to this note...</p>
@@ -296,6 +302,8 @@ export function InlineNoteView({
               )}
             </div>
           )}
+
+          {!isEditingContent && <p className="mt-3 text-sm text-muted-foreground">{formatDate(note.date)}</p>}
         </div>
       </div>
     </div>

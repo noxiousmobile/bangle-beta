@@ -10,7 +10,7 @@ import {
   type MotionValue,
   AnimatePresence,
 } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, htmlToPlainText } from "@/lib/utils";
 import NoteCard, { getTagColor } from "@/components/note-card";
 import { type Note, findRelatedNotes } from "@/lib/data";
 import type { PanInfo } from "framer-motion";
@@ -34,6 +34,7 @@ import {
 import Image from "next/image"; // Added for note image
 import { SmartCollectionsPanel } from "@/components/ai-insights/smart-collections-panel";
 import { NotePreview } from "@/components/note-preview";
+import { InlineNoteView } from "@/components/note-preview/inline-note-view";
 import { abbreviateDate } from "@/lib/utils/date-formatter";
 import { aiSearchEngine } from "@/lib/ai/search-engine";
 import { useMultiSelect } from "@/components/collaborative/multi-select-provider";
@@ -71,6 +72,7 @@ interface NoteSectionProps {
     noteId: number,
     content: { content: string; title?: string },
   ) => void; // Updated for title
+  onNoteSaved?: (note: Note) => void;
   onNoteEdit?: (note: Note) => void;
   onNoteSelect?: (note: Note) => void; // For inline note view
   favouriteNotes?: Set<number>;
@@ -113,6 +115,7 @@ export function NoteSection({
   activeMoodFilter,
   setActiveMoodFilter,
   onNoteSave,
+  onNoteSaved,
   onNoteEdit,
   onNoteSelect,
   favouriteNotes: externalFavouriteNotes,
@@ -799,20 +802,14 @@ export function NoteSection({
                   )}
 
                   <div className="flex items-start gap-3">
-                    {note.image && note.image !== "/placeholder.svg" ? (
+                    {note.image && !note.image.startsWith("/placeholder.svg") && (
                       <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-50">
                         <Image
-                          src={note.image || "/placeholder.svg"}
+                          src={note.image}
                           alt={note.title}
                           fill
                           className="object-cover"
                         />
-                      </div>
-                    ) : (
-                      <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 flex items-start justify-start p-1.5">
-                        <div className="text-[8px] leading-tight text-gray-500 line-clamp-5">
-                          {note.content?.slice(0, 80) || "No content"}
-                        </div>
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
@@ -820,7 +817,7 @@ export function NoteSection({
                         {note.title}
                       </h3>
                       <p className="text-xs text-gray-500 line-clamp-2">
-                        {note.content?.slice(0, 100) || "No content"}
+                        {htmlToPlainText(note.content).slice(0, 100) || "No content"}
                       </p>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -894,165 +891,27 @@ export function NoteSection({
           {/* Right column - Note preview with adjustable width */}
           <div className="flex-1 overflow-hidden flex flex-col bg-white border-l border-gray-200 h-full">
             {splitViewSelectedNote ? (
-              <>
-                {/* Note header - fixed at top */}
-                <div className="border-b border-gray-200 px-6 py-2 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0">
-                  <div className="flex items-center gap-2">
-                    {isSplitViewEditingTitle ? (
-                      <>
-                        <input
-                          ref={splitViewTitleInputRef}
-                          type="text"
-                          value={splitViewEditedTitle}
-                          onChange={(e) =>
-                            setSplitViewEditedTitle(e.target.value)
-                          }
-                          className="flex-1 text-xl font-bold text-gray-900 bg-white border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-400 focus:shadow-sm transition-all"
-                          placeholder="Note title"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleSplitViewSaveTitle();
-                            } else if (e.key === "Escape") {
-                              handleSplitViewCancelTitle();
-                            }
-                          }}
-                        />
-                        <button
-                          onClick={handleSplitViewSaveTitle}
-                          className="p-2 hover:bg-green-100 rounded-full transition-colors text-green-600"
-                          title="Save title"
-                        >
-                          <Save className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={handleSplitViewCancelTitle}
-                          className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
-                          title="Cancel"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </>
-                    ) : (
-                      <h2
-                        className="text-xl font-bold text-gray-900 cursor-pointer hover:text-gray-700 transition-colors"
-                        onClick={handleSplitViewEditTitle}
-                        title="Click to edit title"
-                      >
-                        {splitViewSelectedNote.title}
-                      </h2>
-                    )}
-                  </div>
-                </div>
-
-                {/* Note content - scrollable area */}
-                <div className="flex-1 overflow-y-auto p-6 min-h-0">
-                  <div className="prose max-w-none">
-                    {isSplitViewEditingContent ? (
-                      <div className="bg-card rounded-xl border border-border p-4 md:p-6">
-                        <RichTextEditor
-                          initialContent={splitViewEditedContent}
-                          placeholder="Write your note content here..."
-                          onChange={(html) => setSplitViewEditedContent(html)}
-                          autoFocus={true}
-                          showTags={false}
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="cursor-pointer hover:bg-muted/50 transition-colors rounded-lg p-4"
-                        onClick={handleSplitViewEditContent}
-                      >
-                        <p className="text-foreground whitespace-pre-wrap leading-relaxed">
-                          {splitViewSelectedNote.content ||
-                            "No content available"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action buttons - fixed at bottom */}
-                <div className="border-t border-border p-4 flex items-center justify-between gap-4 flex-shrink-0 bg-white">
-                  {/* Left side: Save/Cancel buttons when editing, or date/category when viewing */}
-                  <div className="flex items-center gap-2">
-                    {isSplitViewEditingContent ? (
-                      <>
-                        <button
-                          onClick={handleSplitViewSaveContent}
-                          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-sm"
-                        >
-                          <Save className="w-4 h-4" />
-                          Save
-                        </button>
-                        <button
-                          onClick={handleSplitViewCancelContent}
-                          className="flex items-center gap-2 px-4 py-2 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80 transition-colors text-sm"
-                        >
-                          <X className="w-4 h-4" />
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <span>{splitViewSelectedNote.date}</span>
-                        <span>•</span>
-                        <span className="capitalize">
-                          {splitViewSelectedNote.category}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Action buttons on the right */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      className={`p-2 rounded-full transition-all ${
-                        favouriteNotes.has(splitViewSelectedNote.id)
-                          ? "bg-destructive/10 text-destructive"
-                          : "hover:bg-muted text-muted-foreground"
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleFavourite(splitViewSelectedNote.id);
-                      }}
-                      title={
-                        favouriteNotes.has(splitViewSelectedNote.id)
-                          ? "Remove from favorites"
-                          : "Add to favorites"
-                      }
-                    >
-                      <Heart
-                        className={`w-5 h-5 ${favouriteNotes.has(splitViewSelectedNote.id) ? "fill-current" : ""}`}
-                      />
-                    </button>
-                    <button
-                      className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onShareNote) {
-                          onShareNote(splitViewSelectedNote);
-                        }
-                      }}
-                      title="Share this note"
-                    >
-                      <Share2 className="w-5 h-5" />
-                    </button>
-                    <button
-                      className="p-2 hover:bg-destructive/10 rounded-full transition-colors text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onNoteDelete && splitViewSelectedNote) {
-                          onNoteDelete(splitViewSelectedNote.id);
-                          setSplitViewSelectedNote(null);
-                        }
-                      }}
-                      title="Delete this note"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </>
+              <InlineNoteView
+                key={splitViewSelectedNote.id}
+                note={splitViewSelectedNote}
+                onClose={() => setSplitViewSelectedNote(null)}
+                onDelete={(noteId) => {
+                  onNoteDelete(noteId);
+                  setSplitViewSelectedNote(null);
+                }}
+                onSave={(_noteId, updatedData) => {
+                  const updatedNote = {
+                    ...splitViewSelectedNote,
+                    ...updatedData,
+                  };
+                  onNoteSaved?.(updatedNote);
+                  setSplitViewSelectedNote(updatedNote);
+                }}
+                onShare={() => onShareNote?.(splitViewSelectedNote)}
+                isFavourite={favouriteNotes.has(splitViewSelectedNote.id)}
+                onToggleFavourite={handleToggleFavourite}
+                allNotes={notes}
+              />
             ) : (
               <div className="h-full flex items-center justify-center text-gray-400">
                 <div className="text-center">

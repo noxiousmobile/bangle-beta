@@ -314,3 +314,106 @@ tr:hover .sticky {
     overflow: hidden;
   }
 }
+
+.note-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  word-break: break-all;
+}
+
+.dark .note-content a {
+  color: #60a5fa;
+}
+
+/* Hashtag anchors render as breakpoint-style dots in a left gutter instead of inline text */
+.note-content {
+  position: relative;
+  isolation: isolate;
+}
+
+.note-content:has(.note-anchor) {
+  padding-left: 1.75rem;
+  overflow-x: clip;
+}
+
+.note-content .note-anchor {
+  position: absolute;
+  left: 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.45rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--muted-foreground);
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  opacity: 0.65;
+  cursor: default;
+  user-select: none;
+  transition: opacity 150ms, background-color 150ms, border-color 150ms;
+}
+
+.note-content .note-anchor::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -0.5rem;
+  top: 50%;
+  width: 200vw;
+  height: 1.6rem;
+  transform: translateY(-50%);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--muted-foreground) 14%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+}
+
+.note-content .note-anchor::after {
+  content: "#" attr(data-anchor);
+  position: absolute;
+  left: -0.375rem;
+  bottom: calc(100% + 6px);
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: var(--foreground);
+  color: var(--background);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(2px);
+  pointer-events: none;
+  transition: opacity 150ms, transform 150ms;
+}
+
+.note-content .note-anchor:hover,
+.note-content .note-anchor.is-highlighted,
+.note-content .note-anchor.is-pinged {
+  opacity: 1;
+  background: var(--foreground);
+  border-color: var(--foreground);
+}
+
+.note-content .note-anchor:hover::after,
+.note-content .note-anchor.is-highlighted::after,
+.note-content .note-anchor.is-pinged::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.note-content .note-anchor.is-highlighted::before {
+  opacity: 1;
+}
+
+.note-content .note-anchor.is-pinged::before {
+  animation: note-anchor-line 1.8s ease-out;
+}
+
+@keyframes note-anchor-line {
+  0%, 40% { opacity: 1; }
+  100% { opacity: 0; }
+}
