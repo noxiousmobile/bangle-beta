@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Share2, Heart, Calendar, Link2, Eye, ExternalLink, Trash2, Save, X, Loader2, Plus } from "lucide-react"
 import { linkifyHtml } from "@/lib/linkify"
+import { withMainLinkCard } from "@/lib/link-cards"
 import { anchorifyHtml } from "@/lib/anchors"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
 import { getTagColor } from "@/components/note-card"
@@ -281,6 +282,9 @@ export function NotePreview({
 
   if (!note || !isOpen) return null
 
+  const withCard = (html: string) =>
+    note.type === "url" ? withMainLinkCard(html, note.url, { title: note.title, image: note.image }) : html
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60" onClick={onClose}>
       <div
@@ -377,29 +381,7 @@ export function NotePreview({
           ) : (
             <div className="p-4 md:p-8">
               <div className="mb-8">
-                {note.type === "url" ? (
-                  <div className="space-y-6">
-                    <a
-                      href={note.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-3 transition-colors hover:border-blue-300"
-                    >
-                      {note.image && (
-                        <div className="relative aspect-video w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 sm:w-36">
-                          <Image src={note.image} alt="" fill sizes="144px" className="object-cover" />
-                        </div>
-                      )}
-                      <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span className="font-medium text-gray-900 truncate">{note.title}</span>
-                        <span className="flex min-w-0 items-center gap-1.5 text-sm text-blue-600 group-hover:underline">
-                          <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
-                          <span className="truncate">{note.url}</span>
-                        </span>
-                      </div>
-                    </a>
-                  </div>
-                ) : note.type === "media" ? (
+                {note.type === "media" ? (
                   <div className="space-y-6">
                     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                       <div className="aspect-video relative">
@@ -418,7 +400,7 @@ export function NotePreview({
                     {isEditingContent ? (
                       <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
                         <RichTextEditor
-                          initialContent={editedContent}
+                          initialContent={withCard(editedContent)}
                           placeholder="Write your note content here..."
                           onChange={(html) => setEditedContent(html)}
                           autoFocus={true}
@@ -452,7 +434,9 @@ export function NotePreview({
                         <div
                           className="note-content prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap"
                           dangerouslySetInnerHTML={{
-                            __html: note.content ? anchorifyHtml(linkifyHtml(note.content)) : "Click to add content to this note...",
+                            __html: withCard(note.content || "")
+                              ? anchorifyHtml(linkifyHtml(withCard(note.content || "")))
+                              : "Click to add content to this note...",
                           }}
                         />
                       </div>

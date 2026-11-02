@@ -289,13 +289,25 @@ export function TextEditorCard({
       const savedHtmlContent = htmlContent
       const savedTags = [...tags]
 
+      // A note that starts with a link card takes its title and thumbnail from that card.
+      const firstLine = savedText.split("\n")[0].trim()
+      let cardTitle: string | undefined
+      let cardImage: string | undefined
+      if (/^https?:\/\//i.test(firstLine) && savedHtmlContent) {
+        const doc = new DOMParser().parseFromString(savedHtmlContent, "text/html")
+        const firstCard = doc.querySelector(".link-card")
+        cardTitle = firstCard?.querySelector(".link-card-title")?.textContent?.trim() || undefined
+        const thumb = firstCard?.querySelector(".link-card-thumb:not(.is-icon) img")?.getAttribute("src")
+        cardImage = thumb && /^https?:\/\//i.test(thumb) ? thumb : undefined
+      }
+
       // Create the note object with content included
       const savedNote = {
         id: Date.now(), // Use timestamp for unique ID
-        title: savedText.split("\n")[0].substring(0, 50) || "Untitled Note",
+        title: (cardTitle ?? firstLine).substring(0, 80) || "Untitled Note",
         content: savedHtmlContent || savedText,
         tags: savedTags,
-        image: "/placeholder.svg?height=80&width=80",
+        image: cardImage ?? "/placeholder.svg?height=80&width=80",
         date: "Just now",
         category: category,
         type: "text" as const,
@@ -335,6 +347,7 @@ export function TextEditorCard({
               placeholder="Write your note here..."
               className="w-full min-h-[300px] md:min-h-auto"
               autoFocus={true}
+              cardInitialLinks={/^https?:\/\/\S+$/i.test(initialText.trim())}
               recentTags={recentTags}
               availableTags={availableTags}
             />

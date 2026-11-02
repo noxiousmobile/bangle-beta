@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { createLinkElement, linkifyElement, linkifyHtml, normalizeUrl } from "@/lib/linkify"
 import { anchorifyElement, anchorifyHtml } from "@/lib/anchors"
-import { attachLinkCards, fillLinkCard, linkCardMarkdown, markExistingLinks, removeLinkCard, LINK_CARD_CLASS } from "@/lib/link-cards"
+import { attachLinkCards, dedupeLinkCards, fillLinkCard, linkCardMarkdown, markExistingLinks, removeLinkCard, LINK_CARD_CLASS } from "@/lib/link-cards"
 import { EditorToolbar } from "./editor-toolbar"
 import { MarkdownToggle } from "./markdown-toggle"
 import { TagInput } from "@/components/tag-input"
@@ -70,6 +70,8 @@ interface RichTextEditorProps {
   recentTags?: string[]
   availableTags?: string[]
   footerStart?: React.ReactNode
+  /** Turn links already in initialContent into preview cards (used when a new note starts from a pasted link). */
+  cardInitialLinks?: boolean
 }
 
 export function RichTextEditor({
@@ -83,6 +85,7 @@ export function RichTextEditor({
   recentTags = [],
   availableTags,
   footerStart,
+  cardInitialLinks = false,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [currentFontSize, setCurrentFontSize] = useState(14)
@@ -148,6 +151,7 @@ export function RichTextEditor({
       const html = anchorifyHtml(linkifyHtml(convertPlainTextToHtml(initialContent)))
       editorRef.current.innerHTML = html
       markExistingLinks(editorRef.current)
+      dedupeLinkCards(editorRef.current)
       const markdown = htmlToMarkdown(html)
       setMarkdownContent(markdown)
       
@@ -162,6 +166,17 @@ export function RichTextEditor({
         markExistingLinks(editor)
         if (editor.innerHTML !== current) setMarkdownContent(markdown)
         else editor.innerHTML = current
+        if (cardInitialLinks) {
+          editor.querySelectorAll('a[data-card="off"]').forEach((a) => a.removeAttribute("data-card"))
+          if (attachCards()) {
+            if (!editor.lastElementChild || editor.lastElementChild.classList.contains(LINK_CARD_CLASS)) {
+              const line = document.createElement("p")
+              line.appendChild(document.createElement("br"))
+              editor.appendChild(line)
+            }
+            handleInputRef.current()
+          }
+        }
         if (autoFocus) {
           const selection = window.getSelection()
           const range = document.createRange()
@@ -311,7 +326,24 @@ export function RichTextEditor({
   const attachCards = useCallback(() => {
     const editor = editorRef.current
     if (!editor) return false
+    const hadFocus = editor.contains(document.activeElement) || document.activeElement === editor
     const cards = attachLinkCards(editor)
+    const lastCard = cards[cards.length - 1]
+    if (lastCard && hadFocus) {
+      // The link the caret sat after is gone, so continue typing on the line below its card.
+      let line = lastCard.nextElementSibling
+      if (!line || line.classList.contains(LINK_CARD_CLASS)) {
+        line = document.createElement("p")
+        line.appendChild(document.createElement("br"))
+        lastCard.after(line)
+      }
+      const range = document.createRange()
+      range.setStart(line, 0)
+      range.collapse(true)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+    }
     for (const card of cards) {
       const url = card.getAttribute("data-url") ?? ""
       fetch(`/api/metadata?url=${encodeURIComponent(url)}`)
@@ -345,7 +377,15 @@ export function RichTextEditor({
     if (removeButton && editorRef.current) {
       e.preventDefault()
       const card = removeButton.closest<HTMLElement>(`.${LINK_CARD_CLASS}`)
-      if (card) removeLinkCard(editorRef.current, card)
+      if (card) {
+        const line = removeLinkCard(editorRef.current, card)
+        const range = document.createRange()
+        range.selectNodeContents(line)
+        range.collapse(false)
+        const selection = window.getSelection()
+        selection?.removeAllRanges()
+        selection?.addRange(range)
+      }
       handleInput()
       return
     }

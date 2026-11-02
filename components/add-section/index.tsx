@@ -190,24 +190,9 @@ export function AddSection({
     if (isUrl(content)) {
       console.log("[v0] Detected as URL")
       // Handle URL content
-      const urlWithProtocol = ensureUrlProtocol(content)
-      console.log("[v0] URL with protocol:", urlWithProtocol)
-      setPreviewUrl(urlWithProtocol)
-      setBottomState("preview")
-
-      // Generate screenshot
-      console.log("[v0] Starting screenshot generation...")
-      setIsGeneratingScreenshot(true)
-      generateScreenshot(urlWithProtocol)
-        .then((screenshot) => {
-          console.log("[v0] Screenshot URL received:", screenshot)
-          setScreenshotUrl(screenshot)
-          setIsGeneratingScreenshot(false)
-        })
-        .catch((error) => {
-          console.error("[v0] Screenshot generation failed:", error)
-          setIsGeneratingScreenshot(false)
-        })
+      // The editor turns the link into an inline preview card, so more links and notes can follow it.
+      setNoteText(ensureUrlProtocol(content.trim()))
+      setBottomState("text-editor")
     } else {
       console.log("[v0] Detected as text content")
       // Handle text content - pass the raw text without any modification
