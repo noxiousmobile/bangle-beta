@@ -410,7 +410,7 @@ export function AddSection({
   return (
     <div
       ref={bottomRef}
-      className={cn("h-full w-full", !expanded && "shadow-[0_-8px_10px_rgba(0,0,0,0.05)]", className)}
+      className={cn("h-full w-full", className)}
       onClick={(e) => {
         if (expanded) {
           toggleExpanded(false)
