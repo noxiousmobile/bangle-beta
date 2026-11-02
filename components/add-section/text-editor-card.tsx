@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Check } from "lucide-react"
 import { RichTextEditor } from "@/components/rich-text-editor"
 
 // Update the TextEditorCardProps interface to include isFullscreen prop
@@ -354,31 +353,28 @@ export function TextEditorCard({
           </div>
 
           <div 
-            className="border-t border-gray-100 bg-white flex-shrink-0 sticky bottom-0"
+            className="bg-white flex-shrink-0 sticky bottom-0"
             style={{ 
               paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)"
             }}
           >
             <div className="flex justify-end space-x-3 px-6 py-3">
-              <motion.button
-                className="flex items-center space-x-1 px-4 py-2 bg-[#edf0f1] rounded-md text-gray-700"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                type="button"
+                className="flex items-center px-4 py-2 bg-[#edf0f1] hover:bg-[#e2e6e8] transition-colors rounded-md text-gray-700"
                 onClick={handleDismissClick}
               >
                 <span>Dismiss</span>
-              </motion.button>
+              </button>
 
-              <motion.button
-                className="flex items-center space-x-1 px-4 py-2 bg-[#87b717] rounded-md text-white"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                type="button"
+                className="flex items-center px-4 py-2 bg-[#008000] hover:bg-[#006e00] transition-colors rounded-md text-white disabled:opacity-60"
                 onClick={handleSaveClick}
                 disabled={!text.trim()}
               >
-                <Check className="w-4 h-4" />
                 <span>Save</span>
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>
