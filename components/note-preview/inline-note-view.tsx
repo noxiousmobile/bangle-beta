@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2 } from "lucide-react"
+import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2, ExternalLink } from "lucide-react"
 import { linkifyHtml } from "@/lib/linkify"
 import { anchorifyHtml, extractAnchors } from "@/lib/anchors"
 import { NoteAnchors } from "@/components/note-anchors"
@@ -24,6 +24,14 @@ interface InlineNoteViewProps {
   onCollectionClick?: () => void
   onSeeRelated?: () => void
   allNotes?: Note[]
+}
+
+function getHostname(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "")
+  } catch {
+    return url
+  }
 }
 
 export function InlineNoteView({
@@ -234,30 +242,29 @@ export function InlineNoteView({
           </div>
 
           {/* Note content */}
-          {note.type === "url" ? (
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
+          {note.type === "url" && note.url && (
+            <a
+              href={note.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group mb-4 flex items-center gap-4 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/40"
+            >
               {note.image && (
-                <div className="aspect-video relative bg-muted">
-                  <Image src={note.image || "/placeholder.svg"} alt={note.title} fill className="object-cover" />
+                <div className="relative aspect-video w-28 flex-shrink-0 overflow-hidden rounded-lg bg-muted sm:w-36">
+                  <Image src={note.image} alt="" fill sizes="144px" className="object-cover" />
                 </div>
               )}
-              <div className="p-6">
-                <p className="text-muted-foreground mb-4">
-                  {note.content || "No description available for this link."}
-                </p>
-                {note.url && (
-                  <a
-                    href={note.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Visit Link
-                  </a>
-                )}
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-xs text-muted-foreground">{getHostname(note.url)}</span>
+                <span className="flex min-w-0 items-center gap-1.5 text-sm text-primary group-hover:underline">
+                  <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+                  <span className="truncate">{note.url}</span>
+                </span>
               </div>
-            </div>
-          ) : note.type === "media" && note.image ? (
+            </a>
+          )}
+
+          {note.type === "media" && note.image ? (
             <div className="bg-card rounded-xl border border-border overflow-hidden">
               <div className="aspect-video relative">
                 <Image src={note.image || "/placeholder.svg"} alt={note.title} fill className="object-cover" />

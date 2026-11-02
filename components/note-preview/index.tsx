@@ -379,31 +379,25 @@ export function NotePreview({
               <div className="mb-8">
                 {note.type === "url" ? (
                   <div className="space-y-6">
-                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                      <div className="aspect-video relative bg-gray-100">
-                        <Image src={note.image || "/placeholder.svg"} alt={note.title} fill className="object-cover" />
-                      </div>
-                      <div className="p-4 md:p-6">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-2">{note.title}</h3>
-                            <p className="text-gray-600 text-sm mb-3">
-                              Preview of the linked content and any additional notes or thoughts about this resource.
-                            </p>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                              <span className="truncate">{note.url}</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => note.url && window.open(note.url, "_blank", "noopener,noreferrer")}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap"
-                          >
-                            Visit Link
-                          </button>
+                    <a
+                      href={note.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-3 transition-colors hover:border-blue-300"
+                    >
+                      {note.image && (
+                        <div className="relative aspect-video w-28 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 sm:w-36">
+                          <Image src={note.image} alt="" fill sizes="144px" className="object-cover" />
                         </div>
+                      )}
+                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <span className="font-medium text-gray-900 truncate">{note.title}</span>
+                        <span className="flex min-w-0 items-center gap-1.5 text-sm text-blue-600 group-hover:underline">
+                          <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+                          <span className="truncate">{note.url}</span>
+                        </span>
                       </div>
-                    </div>
+                    </a>
                   </div>
                 ) : note.type === "media" ? (
                   <div className="space-y-6">
