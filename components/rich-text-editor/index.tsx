@@ -570,8 +570,27 @@ export function RichTextEditor({
     handleInput()
   }, [handleInput, attachCards])
 
-  const undo = useCallback(() => execCmd("undo"), [execCmd])
-  const redo = useCallback(() => execCmd("redo"), [execCmd])
+  const insertHash = useCallback(() => {
+    const editor = editorRef.current
+    if (!editor) return
+    editor.focus()
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
+      const range = document.createRange()
+      range.selectNodeContents(editor)
+      range.collapse(false)
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+    }
+    const range = window.getSelection()!.getRangeAt(0)
+    const { startContainer, startOffset } = range
+    const charBefore =
+      startContainer.nodeType === Node.TEXT_NODE ? (startContainer as Text).data.charAt(startOffset - 1) : ""
+    // Hashtags only become anchors when they start a word, so keep a gap from preceding text
+    const needsSpace = charBefore !== "" && !/[\s\u00A0\u200B(]/.test(charBefore)
+    document.execCommand("insertText", false, needsSpace ? " #" : "#")
+    handleInput()
+  }, [handleInput])
 
   const toggleMarkdownMode = useCallback(() => {
     if (!isMarkdownMode) {
@@ -661,8 +680,7 @@ export function RichTextEditor({
         onBlockquote={insertBlockquote}
         onLink={openLinkInput}
         onImage={insertImage}
-        onUndo={undo}
-        onRedo={redo}
+        onHash={insertHash}
       />
 
       {isLinkInputOpen && !isMarkdownMode && (

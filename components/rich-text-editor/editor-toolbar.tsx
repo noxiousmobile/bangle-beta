@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
-import { ChevronDown, Bold, Italic, Underline, Strikethrough, List, ListOrdered, Heading1, Heading2, Code2, Quote, Undo, Redo, LinkIcon, ImageIcon, RemoveFormatting } from "lucide-react"
+import { ChevronDown, Bold, Italic, Underline, Strikethrough, List, ListOrdered, Heading1, Heading2, Code2, Quote, Hash, LinkIcon, ImageIcon, RemoveFormatting } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface EditorToolbarProps {
@@ -22,8 +22,7 @@ interface EditorToolbarProps {
   onBlockquote: () => void
   onLink: () => void
   onImage: () => void
-  onUndo: () => void
-  onRedo: () => void
+  onHash: () => void
 }
 
 export function EditorToolbar({
@@ -33,7 +32,7 @@ export function EditorToolbar({
   currentFontSize, onFontSize,
   onHeading1, onHeading2,
   onBulletList, onOrderedList, onBlockquote,
-  onLink, onImage, onUndo, onRedo,
+  onLink, onImage, onHash,
 }: EditorToolbarProps) {
   if (isMarkdownMode) return null
 
@@ -92,11 +91,11 @@ export function EditorToolbar({
 
       <ToolbarDivider />
 
-      <ToolbarButton onClick={onUndo} title="Undo">
-        <Undo className="w-4 h-4" />
-      </ToolbarButton>
-      <ToolbarButton onClick={onRedo} title="Redo">
-        <Redo className="w-4 h-4" />
+      <ToolbarButton onClick={onHash} title="Add a hash to mark a section you can jump to">
+        <span className="flex items-center gap-1">
+          <Hash className="w-4 h-4" />
+          <span className="text-xs font-medium">Add hash</span>
+        </span>
       </ToolbarButton>
     </div>
   )
