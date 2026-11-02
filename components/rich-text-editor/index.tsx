@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { createLinkElement, linkifyElement, linkifyHtml, normalizeUrl } from "@/lib/linkify"
 import { anchorifyElement, anchorifyHtml } from "@/lib/anchors"
+import { attachLinkCards, fillLinkCard, linkCardMarkdown, markExistingLinks, removeLinkCard, LINK_CARD_CLASS } from "@/lib/link-cards"
 import { EditorToolbar } from "./editor-toolbar"
 import { MarkdownToggle } from "./markdown-toggle"
 import { TagInput } from "@/components/tag-input"
@@ -116,7 +117,7 @@ export function RichTextEditor({
   }
 
   const htmlToMarkdown = (html: string): string => {
-    return html
+    return linkCardMarkdown(html)
       .replace(/<span[^>]*data-anchor="([^"]+)"[^>]*>[^<]*<\/span>/g, "#$1 ")
       .replace(/<h1>(.*?)<\/h1>/g, "# $1\n\n")
       .replace(/<h2>(.*?)<\/h2>/g, "## $1\n\n")
@@ -146,6 +147,7 @@ export function RichTextEditor({
     if (editorRef.current && initialContent) {
       const html = anchorifyHtml(linkifyHtml(convertPlainTextToHtml(initialContent)))
       editorRef.current.innerHTML = html
+      markExistingLinks(editorRef.current)
       const markdown = htmlToMarkdown(html)
       setMarkdownContent(markdown)
       
@@ -155,10 +157,11 @@ export function RichTextEditor({
       setTimeout(() => {
         const editor = editorRef.current
         if (!editor) return
-        if (editor.innerHTML !== html) {
-          editor.innerHTML = html
-          setMarkdownContent(markdown)
-        }
+        const current = editor.innerHTML
+        editor.innerHTML = html
+        markExistingLinks(editor)
+        if (editor.innerHTML !== current) setMarkdownContent(markdown)
+        else editor.innerHTML = current
         if (autoFocus) {
           const selection = window.getSelection()
           const range = document.createRange()
@@ -302,13 +305,35 @@ export function RichTextEditor({
     handleInput()
   }, [linkValue, handleInput])
 
+  const handleInputRef = useRef(handleInput)
+  handleInputRef.current = handleInput
+
+  const attachCards = useCallback(() => {
+    const editor = editorRef.current
+    if (!editor) return false
+    const cards = attachLinkCards(editor)
+    for (const card of cards) {
+      const url = card.getAttribute("data-url") ?? ""
+      fetch(`/api/metadata?url=${encodeURIComponent(url)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null)
+        .then((meta) => {
+          if (!card.isConnected) return
+          fillLinkCard(card, meta)
+          handleInputRef.current()
+        })
+    }
+    return cards.length > 0
+  }, [])
+
   const autoLinkify = useCallback(() => {
     const editor = editorRef.current
     if (!editor) return
     const linked = linkifyElement(editor)
     const anchored = anchorifyElement(editor)
-    if (linked || anchored) handleInput()
-  }, [handleInput])
+    const carded = attachCards()
+    if (linked || anchored || carded) handleInput()
+  }, [handleInput, attachCards])
 
   const handleEditorKeyUp = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === " " || e.key === "Enter" || e.key === "Tab") autoLinkify()
@@ -316,6 +341,14 @@ export function RichTextEditor({
   }, [autoLinkify, handleSelectionChange])
 
   const handleEditorClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const removeButton = (e.target as HTMLElement).closest(".link-card-remove")
+    if (removeButton && editorRef.current) {
+      e.preventDefault()
+      const card = removeButton.closest<HTMLElement>(`.${LINK_CARD_CLASS}`)
+      if (card) removeLinkCard(editorRef.current, card)
+      handleInput()
+      return
+    }
     const anchor = (e.target as HTMLElement).closest("a")
     if (!anchor?.href) return
     e.preventDefault()
@@ -477,9 +510,10 @@ export function RichTextEditor({
     if (editorRef.current) {
       linkifyElement(editorRef.current)
       anchorifyElement(editorRef.current)
+      attachCards()
     }
     handleInput()
-  }, [handleInput])
+  }, [handleInput, attachCards])
 
   const undo = useCallback(() => execCmd("undo"), [execCmd])
   const redo = useCallback(() => execCmd("redo"), [execCmd])

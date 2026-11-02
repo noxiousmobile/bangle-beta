@@ -12,15 +12,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "URL parameter is required" }, { status: 400 })
   }
 
-  let apiKey = process.env.APIFLASH_API_KEY
-
-  // Fallback to the original hardcoded key for testing if env var is not set
+  const apiKey = process.env.APIFLASH_API_KEY
   if (!apiKey) {
-    console.warn("[v0] APIFLASH_API_KEY environment variable is not set, using fallback key for testing")
-    apiKey = "6f8e83b574ce4d9b9e4e0b4a9b3f3155" // Temporary fallback for testing
+    return NextResponse.json({ error: "Screenshot service is not configured" }, { status: 503 })
   }
-
-  console.log("[v0] API Key present:", !!apiKey)
 
   try {
     // Use the Apiflash API to generate a screenshot
