@@ -339,7 +339,7 @@ export function TextEditorCard({
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex flex-col h-full md:h-auto">
-        <div className="w-full max-w-5xl mx-auto bg-white rounded-lg shadow-lg flex flex-col h-full md:h-auto">
+        <div className="w-full max-w-5xl mx-auto bg-white rounded-lg flex flex-col h-full md:h-auto">
           <div className="flex-1 overflow-y-auto py-4 px-6 md:flex-none">
             <RichTextEditor
               initialContent={initialText}
