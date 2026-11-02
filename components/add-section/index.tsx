@@ -421,8 +421,8 @@ export function AddSection({
       onKeyDown={(e) => {
         // If user starts typing while in initial/options state, transition to text-editor
         if ((bottomState === "initial" || bottomState === "options") && !expanded) {
-          // Don't prevent default or stop propagation - let it flow naturally
-          // Just transition to text-editor mode
+          // Shortcuts like Ctrl/Cmd+V must reach the paste handler, which turns links into preview cards.
+          if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return
           setBottomState("text-editor")
         }
       }}
