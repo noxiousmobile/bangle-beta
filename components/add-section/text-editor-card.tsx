@@ -369,7 +369,7 @@ export function TextEditorCard({
 
               <button
                 type="button"
-                className="flex items-center px-4 py-2 bg-[#008000] hover:bg-[#006e00] transition-colors rounded-md text-white disabled:opacity-60"
+                className="flex items-center px-4 py-2 bg-[#32a751] hover:bg-[#2b9146] transition-colors rounded-md text-white disabled:opacity-60"
                 onClick={handleSaveClick}
                 disabled={!text.trim()}
               >
