@@ -744,7 +744,7 @@ export function NoteSection({
       const paginatedNotes = processedNotes.slice(0, notesPerPage); // Simple pagination
 
       return (
-        <div className="flex gap-0 h-[calc(100vh-160px)] split-view-container relative">
+        <div className="flex gap-0 h-[calc(100vh-160px)] split-view-container relative w-full min-w-0">
           {/* Left column - Notes list with adjustable width */}
           <div
             className="flex-shrink-0 overflow-y-auto pr-2 h-full"
@@ -889,7 +889,7 @@ export function NoteSection({
           </div>
 
           {/* Right column - Note preview with adjustable width */}
-          <div className="flex-1 overflow-hidden flex flex-col bg-white border-l border-gray-200 h-full">
+          <div className="flex-1 min-w-0 overflow-hidden flex flex-col bg-white border-l border-gray-200 h-full">
             {splitViewSelectedNote ? (
               <InlineNoteView
                 key={splitViewSelectedNote.id}

@@ -521,8 +521,8 @@ export function DesktopLayout({
         )}
       </div>
 
-      <div className="flex-1 flex flex-col">
-        <div className="bg-card border-b border-border px-6 py-3 pb-2 desktop-header relative z-50">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="bg-card border-b border-border px-6 py-3 pb-2 desktop-header relative z-50">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
               <AISearchBar
@@ -557,7 +557,7 @@ export function DesktopLayout({
           </div>
         )}
 
-        <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden min-w-0">
           {viewMode === "brain" ? (
             <BrainView
               notes={notes}
