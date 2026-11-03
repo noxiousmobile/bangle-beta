@@ -5,9 +5,12 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { createLinkElement, linkifyElement, linkifyHtml, normalizeUrl } from "@/lib/linkify"
 import { anchorifyElement, anchorifyHtml } from "@/lib/anchors"
+import { attachLinkCards, dedupeLinkCards, fillLinkCard, linkCardMarkdown, markExistingLinks, removeLinkCard, LINK_CARD_CLASS } from "@/lib/link-cards"
 import { EditorToolbar } from "./editor-toolbar"
 import { MarkdownToggle } from "./markdown-toggle"
 import { TagInput } from "@/components/tag-input"
+import { generateTags as generateLinkTags } from "@/lib/utils/url-metadata"
+import { Loader2 } from "lucide-react"
 import "./editor-styles.css"
 
 const ALLOWED_PASTE_TAGS = new Set([
@@ -69,6 +72,8 @@ interface RichTextEditorProps {
   recentTags?: string[]
   availableTags?: string[]
   footerStart?: React.ReactNode
+  /** Turn links already in initialContent into preview cards (used when a new note starts from a pasted link). */
+  cardInitialLinks?: boolean
 }
 
 export function RichTextEditor({
@@ -82,6 +87,7 @@ export function RichTextEditor({
   recentTags = [],
   availableTags,
   footerStart,
+  cardInitialLinks = false,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [currentFontSize, setCurrentFontSize] = useState(14)
@@ -90,6 +96,8 @@ export function RichTextEditor({
   const [autoTags, setAutoTags] = useState<string[]>([])
   const [customTags, setCustomTags] = useState<string[]>(initialTags)
   const [isGeneratingTags, setIsGeneratingTags] = useState(false)
+  const [linkTags, setLinkTags] = useState<Record<string, string[]>>({})
+  const [pendingLinkTags, setPendingLinkTags] = useState(0)
   const [activeFormats, setActiveFormats] = useState<Record<string, boolean>>({})
   const [isLinkInputOpen, setIsLinkInputOpen] = useState(false)
   const [linkValue, setLinkValue] = useState("")
@@ -116,7 +124,7 @@ export function RichTextEditor({
   }
 
   const htmlToMarkdown = (html: string): string => {
-    return html
+    return linkCardMarkdown(html)
       .replace(/<span[^>]*data-anchor="([^"]+)"[^>]*>[^<]*<\/span>/g, "#$1 ")
       .replace(/<h1>(.*?)<\/h1>/g, "# $1\n\n")
       .replace(/<h2>(.*?)<\/h2>/g, "## $1\n\n")
@@ -146,6 +154,8 @@ export function RichTextEditor({
     if (editorRef.current && initialContent) {
       const html = anchorifyHtml(linkifyHtml(convertPlainTextToHtml(initialContent)))
       editorRef.current.innerHTML = html
+      markExistingLinks(editorRef.current)
+      dedupeLinkCards(editorRef.current)
       const markdown = htmlToMarkdown(html)
       setMarkdownContent(markdown)
       
@@ -155,9 +165,21 @@ export function RichTextEditor({
       setTimeout(() => {
         const editor = editorRef.current
         if (!editor) return
-        if (editor.innerHTML !== html) {
-          editor.innerHTML = html
-          setMarkdownContent(markdown)
+        const current = editor.innerHTML
+        editor.innerHTML = html
+        markExistingLinks(editor)
+        if (editor.innerHTML !== current) setMarkdownContent(markdown)
+        else editor.innerHTML = current
+        if (cardInitialLinks) {
+          editor.querySelectorAll('a[data-card="off"]').forEach((a) => a.removeAttribute("data-card"))
+          if (attachCards()) {
+            if (!editor.lastElementChild || editor.lastElementChild.classList.contains(LINK_CARD_CLASS)) {
+              const line = document.createElement("p")
+              line.appendChild(document.createElement("br"))
+              editor.appendChild(line)
+            }
+            handleInputRef.current()
+          }
         }
         if (autoFocus) {
           const selection = window.getSelection()
@@ -302,13 +324,63 @@ export function RichTextEditor({
     handleInput()
   }, [linkValue, handleInput])
 
+  const handleInputRef = useRef(handleInput)
+  handleInputRef.current = handleInput
+
+  const attachCards = useCallback(() => {
+    const editor = editorRef.current
+    if (!editor) return false
+    const hadFocus = editor.contains(document.activeElement) || document.activeElement === editor
+    const cards = attachLinkCards(editor)
+    const lastCard = cards[cards.length - 1]
+    if (lastCard && hadFocus) {
+      // The link the caret sat after is gone, so continue typing on the line below its card.
+      let line = lastCard.nextElementSibling
+      if (!line || line.classList.contains(LINK_CARD_CLASS)) {
+        line = document.createElement("p")
+        line.appendChild(document.createElement("br"))
+        lastCard.after(line)
+      }
+      const range = document.createRange()
+      range.setStart(line, 0)
+      range.collapse(true)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+    }
+    for (const card of cards) {
+      const url = card.getAttribute("data-url") ?? ""
+      const cardId = card.getAttribute("data-card-id") ?? url
+      setPendingLinkTags((n) => n + 1)
+      fetch(`/api/metadata?url=${encodeURIComponent(url)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null)
+        .then(async (meta) => {
+          if (card.isConnected) {
+            fillLinkCard(card, meta)
+            handleInputRef.current()
+          }
+          const tags: string[] =
+            (await generateLinkTags(
+              meta?.title || new URL(url).hostname,
+              meta?.description || "",
+              meta?.contentSample || url,
+            )) ?? []
+          if (tags.length) setLinkTags((prev) => ({ ...prev, [cardId]: tags }))
+        })
+        .finally(() => setPendingLinkTags((n) => Math.max(0, n - 1)))
+    }
+    return cards.length > 0
+  }, [])
+
   const autoLinkify = useCallback(() => {
     const editor = editorRef.current
     if (!editor) return
     const linked = linkifyElement(editor)
     const anchored = anchorifyElement(editor)
-    if (linked || anchored) handleInput()
-  }, [handleInput])
+    const carded = attachCards()
+    if (linked || anchored || carded) handleInput()
+  }, [handleInput, attachCards])
 
   const handleEditorKeyUp = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === " " || e.key === "Enter" || e.key === "Tab") autoLinkify()
@@ -316,6 +388,22 @@ export function RichTextEditor({
   }, [autoLinkify, handleSelectionChange])
 
   const handleEditorClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const removeButton = (e.target as HTMLElement).closest(".link-card-remove")
+    if (removeButton && editorRef.current) {
+      e.preventDefault()
+      const card = removeButton.closest<HTMLElement>(`.${LINK_CARD_CLASS}`)
+      if (card) {
+        const line = removeLinkCard(editorRef.current, card)
+        const range = document.createRange()
+        range.selectNodeContents(line)
+        range.collapse(false)
+        const selection = window.getSelection()
+        selection?.removeAllRanges()
+        selection?.addRange(range)
+      }
+      handleInput()
+      return
+    }
     const anchor = (e.target as HTMLElement).closest("a")
     if (!anchor?.href) return
     e.preventDefault()
@@ -477,12 +565,32 @@ export function RichTextEditor({
     if (editorRef.current) {
       linkifyElement(editorRef.current)
       anchorifyElement(editorRef.current)
+      attachCards()
     }
     handleInput()
-  }, [handleInput])
+  }, [handleInput, attachCards])
 
-  const undo = useCallback(() => execCmd("undo"), [execCmd])
-  const redo = useCallback(() => execCmd("redo"), [execCmd])
+  const insertHash = useCallback(() => {
+    const editor = editorRef.current
+    if (!editor) return
+    editor.focus()
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
+      const range = document.createRange()
+      range.selectNodeContents(editor)
+      range.collapse(false)
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+    }
+    const range = window.getSelection()!.getRangeAt(0)
+    const { startContainer, startOffset } = range
+    const charBefore =
+      startContainer.nodeType === Node.TEXT_NODE ? (startContainer as Text).data.charAt(startOffset - 1) : ""
+    // Hashtags only become anchors when they start a word, so keep a gap from preceding text
+    const needsSpace = charBefore !== "" && !/[\s\u00A0\u200B(]/.test(charBefore)
+    document.execCommand("insertText", false, needsSpace ? " #" : "#")
+    handleInput()
+  }, [handleInput])
 
   const toggleMarkdownMode = useCallback(() => {
     if (!isMarkdownMode) {
@@ -540,14 +648,18 @@ export function RichTextEditor({
         const matched = Object.entries(keywords)
           .filter(([, words]) => words.some((w) => lowerText.includes(w)))
           .map(([cat]) => cat)
-        setAutoTags(matched.slice(0, 3))
+        const editor = editorRef.current
+        const fromLinks = Object.entries(linkTags)
+          .filter(([id]) => !editor || editor.querySelector(`[data-card-id="${CSS.escape(id)}"]`))
+          .flatMap(([, tags]) => tags)
+        setAutoTags([...new Set([...fromLinks, ...matched.slice(0, 3)])].slice(0, 5))
       } finally {
         setIsGeneratingTags(false)
       }
     }
     const t = setTimeout(generateTags, 500)
     return () => clearTimeout(t)
-  }, [markdownContent])
+  }, [markdownContent, linkTags])
 
   return (
     <div className={cn("rich-text-editor w-full flex flex-col", className)}>
@@ -568,8 +680,7 @@ export function RichTextEditor({
         onBlockquote={insertBlockquote}
         onLink={openLinkInput}
         onImage={insertImage}
-        onUndo={undo}
-        onRedo={redo}
+        onHash={insertHash}
       />
 
       {isLinkInputOpen && !isMarkdownMode && (
@@ -657,14 +768,27 @@ export function RichTextEditor({
             recentTags={recentTags}
             excludeTags={autoTags}
             placeholder={autoTags.length === 0 ? "Type to auto-generate tags, or search and add your own..." : "Search or add tags..."}
-            leading={autoTags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
-              >
-                {tag}
-              </span>
-            ))}
+            leading={
+              <>
+                {autoTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {pendingLinkTags > 0 && (
+                  <span
+                    role="status"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                  >
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    Generating tags...
+                  </span>
+                )}
+              </>
+            }
           />
         </div>
       )}

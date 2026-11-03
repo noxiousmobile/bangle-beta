@@ -2,8 +2,9 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2 } from "lucide-react"
+import { ArrowLeft, Share2, Heart, Trash2, Save, X, Tag, Link2, ExternalLink } from "lucide-react"
 import { linkifyHtml } from "@/lib/linkify"
+import { withMainLinkCard } from "@/lib/link-cards"
 import { anchorifyHtml, extractAnchors } from "@/lib/anchors"
 import { NoteAnchors } from "@/components/note-anchors"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
@@ -26,6 +27,14 @@ interface InlineNoteViewProps {
   allNotes?: Note[]
 }
 
+function getHostname(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "")
+  } catch {
+    return url
+  }
+}
+
 export function InlineNoteView({
   note,
   onClose,
@@ -42,7 +51,11 @@ export function InlineNoteView({
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [isEditingContent, setIsEditingContent] = useState(false)
   const [editedTitle, setEditedTitle] = useState(note.title)
-  const [editedContent, setEditedContent] = useState(note.content || "")
+  const baseContent =
+    note.type === "url"
+      ? withMainLinkCard(note.content || "", note.url, { title: note.title, image: note.image })
+      : note.content || ""
+  const [editedContent, setEditedContent] = useState(baseContent)
   const titleInputRef = useRef<HTMLInputElement>(null)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -64,9 +77,9 @@ export function InlineNoteView({
     // This prevents the editor from closing during auto-save
     if (!isEditingTitle && !isEditingContent) {
       setEditedTitle(note.title)
-      setEditedContent(note.content || "")
+      setEditedContent(baseContent)
     }
-  }, [note, isEditingTitle, isEditingContent])
+  }, [note, baseContent, isEditingTitle, isEditingContent])
 
   // Auto-save content when it changes
   useEffect(() => {
@@ -76,7 +89,7 @@ export function InlineNoteView({
     }
 
     // Only auto-save if content has changed
-    if (editedContent !== note.content) {
+    if (editedContent !== note.content && editedContent !== baseContent) {
       // Set a new timer to save after 1 second of inactivity
       autoSaveTimerRef.current = setTimeout(() => {
         onSave?.(note.id, { content: editedContent })
@@ -88,7 +101,7 @@ export function InlineNoteView({
         clearTimeout(autoSaveTimerRef.current)
       }
     }
-  }, [editedContent, note.content, note.id, onSave])
+  }, [editedContent, baseContent, note.content, note.id, onSave])
 
   const handleEditTitle = () => {
     setIsEditingTitle(true)
@@ -234,30 +247,7 @@ export function InlineNoteView({
           </div>
 
           {/* Note content */}
-          {note.type === "url" ? (
-            <div className="bg-card rounded-xl border border-border overflow-hidden">
-              {note.image && (
-                <div className="aspect-video relative bg-muted">
-                  <Image src={note.image || "/placeholder.svg"} alt={note.title} fill className="object-cover" />
-                </div>
-              )}
-              <div className="p-6">
-                <p className="text-muted-foreground mb-4">
-                  {note.content || "No description available for this link."}
-                </p>
-                {note.url && (
-                  <a
-                    href={note.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Visit Link
-                  </a>
-                )}
-              </div>
-            </div>
-          ) : note.type === "media" && note.image ? (
+          {note.type === "media" && note.image ? (
             <div className="bg-card rounded-xl border border-border overflow-hidden">
               <div className="aspect-video relative">
                 <Image src={note.image || "/placeholder.svg"} alt={note.title} fill className="object-cover" />
@@ -289,11 +279,11 @@ export function InlineNoteView({
                     handleEditContent()
                   }}
                 >
-                  {note.content ? (
+                  {baseContent ? (
                     <div
                       className="note-content prose prose-sm max-w-none text-foreground whitespace-pre-wrap"
                       style={{ fontSize: "14px" }}
-                      dangerouslySetInnerHTML={{ __html: anchorifyHtml(linkifyHtml(note.content)) }}
+                      dangerouslySetInnerHTML={{ __html: anchorifyHtml(linkifyHtml(baseContent)) }}
                     />
                   ) : (
                     <p className="text-muted-foreground italic">Click to add content to this note...</p>

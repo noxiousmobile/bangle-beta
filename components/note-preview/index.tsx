@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Share2, Heart, Calendar, Link2, Eye, ExternalLink, Trash2, Save, X, Loader2, Plus } from "lucide-react"
 import { linkifyHtml } from "@/lib/linkify"
+import { withMainLinkCard } from "@/lib/link-cards"
 import { anchorifyHtml } from "@/lib/anchors"
 import { type Note, findRelatedNotes, recentNotes } from "@/lib/data"
 import { getTagColor } from "@/components/note-card"
@@ -281,6 +282,9 @@ export function NotePreview({
 
   if (!note || !isOpen) return null
 
+  const withCard = (html: string) =>
+    note.type === "url" ? withMainLinkCard(html, note.url, { title: note.title, image: note.image }) : html
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60" onClick={onClose}>
       <div
@@ -377,35 +381,7 @@ export function NotePreview({
           ) : (
             <div className="p-4 md:p-8">
               <div className="mb-8">
-                {note.type === "url" ? (
-                  <div className="space-y-6">
-                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                      <div className="aspect-video relative bg-gray-100">
-                        <Image src={note.image || "/placeholder.svg"} alt={note.title} fill className="object-cover" />
-                      </div>
-                      <div className="p-4 md:p-6">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-2">{note.title}</h3>
-                            <p className="text-gray-600 text-sm mb-3">
-                              Preview of the linked content and any additional notes or thoughts about this resource.
-                            </p>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <ExternalLink className="w-4 h-4 flex-shrink-0" />
-                              <span className="truncate">{note.url}</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => note.url && window.open(note.url, "_blank", "noopener,noreferrer")}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap"
-                          >
-                            Visit Link
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : note.type === "media" ? (
+                {note.type === "media" ? (
                   <div className="space-y-6">
                     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                       <div className="aspect-video relative">
@@ -424,7 +400,7 @@ export function NotePreview({
                     {isEditingContent ? (
                       <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
                         <RichTextEditor
-                          initialContent={editedContent}
+                          initialContent={withCard(editedContent)}
                           placeholder="Write your note content here..."
                           onChange={(html) => setEditedContent(html)}
                           autoFocus={true}
@@ -458,7 +434,9 @@ export function NotePreview({
                         <div
                           className="note-content prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap"
                           dangerouslySetInnerHTML={{
-                            __html: note.content ? anchorifyHtml(linkifyHtml(note.content)) : "Click to add content to this note...",
+                            __html: withCard(note.content || "")
+                              ? anchorifyHtml(linkifyHtml(withCard(note.content || "")))
+                              : "Click to add content to this note...",
                           }}
                         />
                       </div>

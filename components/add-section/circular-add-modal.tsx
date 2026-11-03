@@ -124,6 +124,8 @@ export function CircularAddModal({
       ) {
         return;
       }
+      // Shortcuts like Ctrl/Cmd+V must reach the paste handler instead of inserting the letter.
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
 
       // User started typing - morph to editor
       setHasStartedEditing(true);

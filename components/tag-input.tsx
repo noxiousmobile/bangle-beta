@@ -122,10 +122,18 @@ export function TagInput({
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm text-foreground"
+            className="group inline-flex items-center gap-1.5 rounded-full bg-muted py-1 pl-3 pr-1.5 text-sm text-foreground"
           >
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: getTagColor(tag) }} aria-hidden="true" />
             {tag}
+            <button
+              type="button"
+              onClick={() => onChange(tags.filter((t) => t !== tag))}
+              className="inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              aria-label={`Remove tag ${tag}`}
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
           </span>
         ))}
         <button

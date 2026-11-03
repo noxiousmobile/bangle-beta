@@ -92,7 +92,7 @@ export function anchorifyElement(root: HTMLElement): boolean {
 
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode: (node) =>
-      node.parentElement?.closest(`a, code, pre, .${ANCHOR_CLASS}`) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+      node.parentElement?.closest(`a, code, pre, .link-card, .${ANCHOR_CLASS}`) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
   })
   const textNodes: Text[] = []
   while (walker.nextNode()) textNodes.push(walker.currentNode as Text)

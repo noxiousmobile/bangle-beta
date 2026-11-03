@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Check } from "lucide-react"
 import { RichTextEditor } from "@/components/rich-text-editor"
 
 // Update the TextEditorCardProps interface to include isFullscreen prop
@@ -289,13 +288,25 @@ export function TextEditorCard({
       const savedHtmlContent = htmlContent
       const savedTags = [...tags]
 
+      // A note that starts with a link card takes its title and thumbnail from that card.
+      const firstLine = savedText.split("\n")[0].trim()
+      let cardTitle: string | undefined
+      let cardImage: string | undefined
+      if (/^https?:\/\//i.test(firstLine) && savedHtmlContent) {
+        const doc = new DOMParser().parseFromString(savedHtmlContent, "text/html")
+        const firstCard = doc.querySelector(".link-card")
+        cardTitle = firstCard?.querySelector(".link-card-title")?.textContent?.trim() || undefined
+        const thumb = firstCard?.querySelector(".link-card-thumb:not(.is-icon) img")?.getAttribute("src")
+        cardImage = thumb && /^https?:\/\//i.test(thumb) ? thumb : undefined
+      }
+
       // Create the note object with content included
       const savedNote = {
         id: Date.now(), // Use timestamp for unique ID
-        title: savedText.split("\n")[0].substring(0, 50) || "Untitled Note",
+        title: (cardTitle ?? firstLine).substring(0, 80) || "Untitled Note",
         content: savedHtmlContent || savedText,
         tags: savedTags,
-        image: "/placeholder.svg?height=80&width=80",
+        image: cardImage ?? "/placeholder.svg?height=80&width=80",
         date: "Just now",
         category: category,
         type: "text" as const,
@@ -327,7 +338,7 @@ export function TextEditorCard({
       onClick={(e) => e.stopPropagation()}
     >
       <div className="flex flex-col h-full md:h-auto">
-        <div className="w-full max-w-5xl mx-auto bg-white rounded-lg shadow-lg flex flex-col h-full md:h-auto">
+        <div className="w-full max-w-5xl mx-auto bg-white rounded-lg flex flex-col h-full md:h-auto">
           <div className="flex-1 overflow-y-auto py-4 px-6 md:flex-none">
             <RichTextEditor
               initialContent={initialText}
@@ -335,37 +346,35 @@ export function TextEditorCard({
               placeholder="Write your note here..."
               className="w-full min-h-[300px] md:min-h-auto"
               autoFocus={true}
+              cardInitialLinks={/^https?:\/\/\S+$/i.test(initialText.trim())}
               recentTags={recentTags}
               availableTags={availableTags}
             />
           </div>
 
           <div 
-            className="border-t border-gray-100 bg-white flex-shrink-0 sticky bottom-0"
+            className="bg-white flex-shrink-0 sticky bottom-0"
             style={{ 
               paddingBottom: "max(env(safe-area-inset-bottom, 16px), 16px)"
             }}
           >
             <div className="flex justify-end space-x-3 px-6 py-3">
-              <motion.button
-                className="flex items-center space-x-1 px-4 py-2 bg-[#edf0f1] rounded-md text-gray-700"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                type="button"
+                className="flex items-center px-4 py-2 bg-[#edf0f1] hover:bg-[#e2e6e8] transition-colors rounded-md text-gray-700"
                 onClick={handleDismissClick}
               >
                 <span>Dismiss</span>
-              </motion.button>
+              </button>
 
-              <motion.button
-                className="flex items-center space-x-1 px-4 py-2 bg-[#87b717] rounded-md text-white"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                type="button"
+                className="flex items-center px-4 py-2 bg-[#32a751] hover:bg-[#2b9146] transition-colors rounded-md text-white disabled:opacity-60"
                 onClick={handleSaveClick}
                 disabled={!text.trim()}
               >
-                <Check className="w-4 h-4" />
                 <span>Save</span>
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>

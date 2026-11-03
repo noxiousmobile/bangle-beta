@@ -190,24 +190,9 @@ export function AddSection({
     if (isUrl(content)) {
       console.log("[v0] Detected as URL")
       // Handle URL content
-      const urlWithProtocol = ensureUrlProtocol(content)
-      console.log("[v0] URL with protocol:", urlWithProtocol)
-      setPreviewUrl(urlWithProtocol)
-      setBottomState("preview")
-
-      // Generate screenshot
-      console.log("[v0] Starting screenshot generation...")
-      setIsGeneratingScreenshot(true)
-      generateScreenshot(urlWithProtocol)
-        .then((screenshot) => {
-          console.log("[v0] Screenshot URL received:", screenshot)
-          setScreenshotUrl(screenshot)
-          setIsGeneratingScreenshot(false)
-        })
-        .catch((error) => {
-          console.error("[v0] Screenshot generation failed:", error)
-          setIsGeneratingScreenshot(false)
-        })
+      // The editor turns the link into an inline preview card, so more links and notes can follow it.
+      setNoteText(ensureUrlProtocol(content.trim()))
+      setBottomState("text-editor")
     } else {
       console.log("[v0] Detected as text content")
       // Handle text content - pass the raw text without any modification
@@ -425,7 +410,7 @@ export function AddSection({
   return (
     <div
       ref={bottomRef}
-      className={cn("h-full w-full", !expanded && "shadow-[0_-8px_10px_rgba(0,0,0,0.05)]", className)}
+      className={cn("h-full w-full", className)}
       onClick={(e) => {
         if (expanded) {
           toggleExpanded(false)
@@ -436,8 +421,8 @@ export function AddSection({
       onKeyDown={(e) => {
         // If user starts typing while in initial/options state, transition to text-editor
         if ((bottomState === "initial" || bottomState === "options") && !expanded) {
-          // Don't prevent default or stop propagation - let it flow naturally
-          // Just transition to text-editor mode
+          // Shortcuts like Ctrl/Cmd+V must reach the paste handler, which turns links into preview cards.
+          if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return
           setBottomState("text-editor")
         }
       }}
