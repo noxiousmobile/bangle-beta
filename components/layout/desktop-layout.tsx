@@ -46,6 +46,7 @@ interface DesktopLayoutProps {
   onViewChange: (view: ViewMode) => void;
   onNoteDelete: (noteId: number) => void;
   onNoteSaved: (note: Note) => void;
+  onNoteOpened?: (noteId: number) => void;
   onShare: () => void;
   onShareNote?: (note: Note) => void;
   // Bangle props
@@ -68,6 +69,7 @@ export function DesktopLayout({
   onViewChange,
   onNoteDelete,
   onNoteSaved,
+  onNoteOpened,
   onShare,
   onShareNote,
   bangles = [],
@@ -82,7 +84,12 @@ export function DesktopLayout({
   const [activeFilter, setActiveFilter] = useState<string[]>([]);
   const [isAddNoteOpen, setIsAddNoteOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [selectedNote, setSelectedNoteState] = useState<Note | null>(null);
+  // Bump the note to the top of Recent once the user leaves it, so the list doesn't jump while it's open.
+  const setSelectedNote = (next: Note | null) => {
+    if (selectedNote && selectedNote.id !== next?.id) onNoteOpened?.(selectedNote.id);
+    setSelectedNoteState(next);
+  };
   const [activeView, setActiveView] = useState<
     "recents" | "common" | "favourites"
   >("recents");

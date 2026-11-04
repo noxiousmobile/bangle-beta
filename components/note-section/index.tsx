@@ -75,6 +75,7 @@ interface NoteSectionProps {
   onNoteSaved?: (note: Note) => void;
   onNoteEdit?: (note: Note) => void;
   onNoteSelect?: (note: Note) => void; // For inline note view
+  onNoteOpened?: (noteId: number) => void;
   favouriteNotes?: Set<number>;
   onToggleFavourite?: (noteId: number) => void;
   externalActiveCollection?: any | null;
@@ -118,6 +119,7 @@ export function NoteSection({
   onNoteSaved,
   onNoteEdit,
   onNoteSelect,
+  onNoteOpened,
   favouriteNotes: externalFavouriteNotes,
   onToggleFavourite: externalToggleFavourite,
   externalActiveCollection,
@@ -481,6 +483,9 @@ export function NoteSection({
 
   const handleNoteCardClick = (note: Note) => {
     if (viewMode === "split") {
+      if (splitViewSelectedNote && splitViewSelectedNote.id !== note.id) {
+        onNoteOpened?.(splitViewSelectedNote.id);
+      }
       setSplitViewSelectedNote(note);
       return;
     }
@@ -894,7 +899,10 @@ export function NoteSection({
               <InlineNoteView
                 key={splitViewSelectedNote.id}
                 note={splitViewSelectedNote}
-                onClose={() => setSplitViewSelectedNote(null)}
+                onClose={() => {
+                  onNoteOpened?.(splitViewSelectedNote.id);
+                  setSplitViewSelectedNote(null);
+                }}
                 onDelete={(noteId) => {
                   onNoteDelete(noteId);
                   setSplitViewSelectedNote(null);
@@ -1345,6 +1353,7 @@ export function NoteSection({
         isFavourite={selectedNote ? favouriteNotes.has(selectedNote.id) : false}
         onToggleFavourite={handleToggleFavourite}
         onClose={() => {
+          if (selectedNote) onNoteOpened?.(selectedNote.id);
           setIsNotePreviewOpen(false);
           setSelectedNote(null);
         }}

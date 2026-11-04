@@ -8,6 +8,7 @@ import {
   fetchNotes,
   insertNote,
   updateNote,
+  markNoteOpened,
   deleteNotes,
   fetchBangles,
   insertBangle,
@@ -29,6 +30,7 @@ import type { ViewMode, Bangle } from "@/lib/types"
 
 const EMPTY_NOTES: Note[] = []
 const EMPTY_BANGLES: Bangle[] = []
+const JUST_NOW = "less than a minute ago"
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function HomeContent() {
@@ -188,7 +190,11 @@ function HomeContent() {
       typeof newNote.id === "number" && newNote.id > 0 && notes.some((n) => n.id === newNote.id)
 
     if (isExisting) {
-      setNotes((prev) => prev.map((n) => (n.id === newNote.id ? { ...n, ...newNote } : n)))
+      setNotes((prev) => {
+        const existing = prev.find((n) => n.id === newNote.id)
+        const merged = { ...existing, ...newNote, date: JUST_NOW } as Note
+        return [merged, ...prev.filter((n) => n.id !== newNote.id)]
+      })
       updateNote(newNote.id, newNote).catch((err) => reportSyncError("update note", err))
     } else {
       const tempId = newNote.id
@@ -209,6 +215,15 @@ function HomeContent() {
     setTimeout(() => {
       toggleExpanded(true)
     }, 100)
+  }
+
+  const handleNoteOpened = (noteId: number) => {
+    setNotes((prev) => {
+      const index = prev.findIndex((n) => n.id === noteId)
+      if (index <= 0) return prev
+      return [prev[index], ...prev.slice(0, index), ...prev.slice(index + 1)]
+    })
+    if (noteId > 0) markNoteOpened(noteId).catch((err) => reportSyncError("record note open", err))
   }
 
   // Handle individual note deletion
@@ -341,6 +356,7 @@ function HomeContent() {
                 viewMode={viewMode}
                 onNoteDelete={handleNoteDelete}
                 onShareNote={handleShareSingleNote}
+                onNoteOpened={handleNoteOpened}
               />
             )}
           </div>
@@ -401,6 +417,7 @@ function HomeContent() {
           onViewChange={handleViewChange}
           onNoteDelete={handleNoteDelete}
           onNoteSaved={handleNoteSaved}
+          onNoteOpened={handleNoteOpened}
           onShare={handleShare}
           onShareNote={handleShareSingleNote}
           bangles={bangles}

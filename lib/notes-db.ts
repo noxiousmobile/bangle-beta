@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/client"
 import type { Note } from "@/lib/data"
 import type { Bangle } from "@/lib/types"
 
-const NOTE_COLUMNS = "id, title, content, tags, category, type, url, image, created_at"
+const NOTE_COLUMNS = "id, title, content, tags, category, type, url, image, created_at, updated_at, last_opened_at"
 const BANGLE_COLUMNS = "id, title, description, source_note_id, atom_ids, merged_tags, created_at, updated_at"
 
 type NoteRow = {
@@ -16,6 +16,8 @@ type NoteRow = {
   url: string | null
   image: string | null
   created_at: string
+  updated_at: string | null
+  last_opened_at: string | null
 }
 
 type BangleRow = {
@@ -39,7 +41,7 @@ function rowToNote(row: NoteRow): Note {
     type: row.type,
     url: row.url ?? undefined,
     image: row.image ?? "/placeholder.svg",
-    date: formatDistanceToNow(new Date(row.created_at), { addSuffix: true }),
+    date: formatDistanceToNow(new Date(row.updated_at ?? row.created_at), { addSuffix: true }),
   } as Note
 }
 
@@ -79,9 +81,16 @@ export async function fetchNotes(): Promise<Note[]> {
   const { data, error } = await supabase
     .from("notes")
     .select(NOTE_COLUMNS)
+    .order("last_opened_at", { ascending: false })
     .order("created_at", { ascending: false })
   if (error) throw error
   return (data as NoteRow[]).map(rowToNote)
+}
+
+export async function markNoteOpened(id: number): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from("notes").update({ last_opened_at: new Date().toISOString() }).eq("id", id)
+  if (error) throw error
 }
 
 export async function insertNote(note: Partial<Note>): Promise<Note> {
@@ -93,7 +102,10 @@ export async function insertNote(note: Partial<Note>): Promise<Note> {
 
 export async function updateNote(id: number, note: Partial<Note>): Promise<void> {
   const supabase = createClient()
-  const { error } = await supabase.from("notes").update(noteToRow(note)).eq("id", id)
+  const { error } = await supabase
+    .from("notes")
+    .update({ ...noteToRow(note), last_opened_at: new Date().toISOString() })
+    .eq("id", id)
   if (error) throw error
 }
 
