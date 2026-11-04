@@ -74,6 +74,8 @@ interface RichTextEditorProps {
   footerStart?: React.ReactNode
   /** Turn links already in initialContent into preview cards (used when a new note starts from a pasted link). */
   cardInitialLinks?: boolean
+  /** Grow the writing area to fill the parent's height instead of using a viewport-based max height. */
+  fillHeight?: boolean
 }
 
 export function RichTextEditor({
@@ -88,6 +90,7 @@ export function RichTextEditor({
   availableTags,
   footerStart,
   cardInitialLinks = false,
+  fillHeight = false,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [currentFontSize, setCurrentFontSize] = useState(14)
@@ -727,15 +730,21 @@ export function RichTextEditor({
 
       {isMarkdownMode ? (
         <textarea
-          className="w-full h-64 p-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono text-sm"
+          className={cn(
+            "w-full p-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono text-sm",
+            fillHeight ? "flex-1 min-h-40" : "h-64",
+          )}
           value={markdownContent}
           onChange={handleMarkdownChange}
           placeholder="Write in Markdown..."
         />
       ) : (
         <div
-          className="editor-container border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-primary/20 overflow-y-auto"
-          style={{ minHeight: "10rem", maxHeight: "calc(100vh - 400px)" }}
+          className={cn(
+            "editor-container border border-gray-200 rounded-md focus-within:ring-2 focus-within:ring-primary/20 overflow-y-auto",
+            fillHeight && "flex-1",
+          )}
+          style={fillHeight ? { minHeight: "10rem" } : { minHeight: "10rem", maxHeight: "calc(100vh - 400px)" }}
         >
           <div
             ref={editorRef}

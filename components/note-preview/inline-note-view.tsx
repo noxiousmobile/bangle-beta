@@ -12,6 +12,7 @@ import { getRelatedNotesCount } from "@/lib/bangle-utils"
 import Image from "next/image"
 import { RichTextEditor } from "@/components/rich-text-editor"
 import { TagInput } from "@/components/tag-input"
+import { cn } from "@/lib/utils"
 
 interface InlineNoteViewProps {
   note: Note
@@ -238,8 +239,8 @@ export function InlineNoteView({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="px-6 py-6">
+      <div className="flex flex-1 min-h-0 flex-col overflow-auto">
+        <div className="flex flex-1 min-h-0 flex-col px-6 py-6">
           {/* Tags */}
           <div className="mb-6 flex flex-col gap-3">
             <TagInput
@@ -265,10 +266,15 @@ export function InlineNoteView({
               )}
             </div>
           ) : (
-            <div ref={contentRef} className="bg-card rounded-xl border border-border">
+            <div
+              ref={contentRef}
+              className={cn("bg-card rounded-xl border border-border", isEditingContent && "flex flex-1 min-h-0 flex-col")}
+            >
               {isEditingContent ? (
-                <div className="p-3">
+                <div className="flex flex-1 min-h-0 flex-col p-3">
                   <RichTextEditor
+                    className="flex-1 min-h-0"
+                    fillHeight
                     initialContent={editedContent}
                     placeholder="Write your note content here..."
                     onChange={(html) => setEditedContent(html)}
