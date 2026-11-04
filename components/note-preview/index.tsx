@@ -70,10 +70,10 @@ export function NotePreview({
       loadAIInsights()
       loadRelatedNotes()
       setIsEditingTitle(false)
-      setIsEditingContent(false)
+      setIsEditingContent(note.type !== "media")
       setIsEditingTags(false)
       setEditedTitle(note.title || "")
-      setEditedContent(note.content || "Start writing your note here...")
+      setEditedContent(note.content || "")
       setEditedTags(note.tags || [])
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" })
@@ -398,7 +398,7 @@ export function NotePreview({
                 ) : (
                   <div className="prose prose-sm max-w-none">
                     {isEditingContent ? (
-                      <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-6">
+                      <div className="bg-white rounded-xl border border-gray-200 p-2 md:p-3">
                         <RichTextEditor
                           initialContent={withCard(editedContent)}
                           placeholder="Write your note content here..."

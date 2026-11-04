@@ -51,7 +51,7 @@ export function InlineNoteView({
   showBackButton = true,
 }: InlineNoteViewProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
-  const [isEditingContent, setIsEditingContent] = useState(false)
+  const [isEditingContent, setIsEditingContent] = useState(note.type !== "media")
   const [editedTitle, setEditedTitle] = useState(note.title)
   const baseContent =
     note.type === "url"
@@ -267,7 +267,7 @@ export function InlineNoteView({
           ) : (
             <div ref={contentRef} className="bg-card rounded-xl border border-border">
               {isEditingContent ? (
-                <div className="p-6">
+                <div className="p-3">
                   <RichTextEditor
                     initialContent={editedContent}
                     placeholder="Write your note content here..."

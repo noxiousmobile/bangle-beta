@@ -595,6 +595,7 @@ export function DesktopLayout({
             />
           ) : selectedNote ? (
             <InlineNoteView
+              key={selectedNote.id}
               note={selectedNote}
               onClose={() => setSelectedNote(null)}
               onDelete={(noteId) => {

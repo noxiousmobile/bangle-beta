@@ -551,6 +551,7 @@ export function BrainView({
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden mx-4">
             <InlineNoteView
+              key={viewingNote.id}
               note={viewingNote}
               onClose={() => setViewingNote(null)}
               onDelete={(noteId) => {
