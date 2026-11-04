@@ -25,6 +25,7 @@ interface InlineNoteViewProps {
   onCollectionClick?: () => void
   onSeeRelated?: () => void
   allNotes?: Note[]
+  showBackButton?: boolean
 }
 
 function getHostname(url: string) {
@@ -47,6 +48,7 @@ export function InlineNoteView({
   onCollectionClick,
   onSeeRelated,
   allNotes = [],
+  showBackButton = true,
 }: InlineNoteViewProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [isEditingContent, setIsEditingContent] = useState(false)
@@ -138,15 +140,19 @@ export function InlineNoteView({
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-card flex-shrink-0">
         <div className="flex items-center gap-4 flex-1 min-w-0">
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-medium">Back</span>
-          </button>
-          
-          <div className="h-6 w-px bg-border" />
+          {showBackButton && (
+            <>
+              <button
+                onClick={onClose}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span className="text-sm font-medium">Back</span>
+              </button>
+
+              <div className="h-6 w-px bg-border" />
+            </>
+          )}
           
           {isEditingTitle ? (
             <div className="flex items-center gap-2 flex-1">

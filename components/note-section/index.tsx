@@ -899,6 +899,7 @@ export function NoteSection({
               <InlineNoteView
                 key={splitViewSelectedNote.id}
                 note={splitViewSelectedNote}
+                showBackButton={false}
                 onClose={() => {
                   onNoteOpened?.(splitViewSelectedNote.id);
                   setSplitViewSelectedNote(null);
